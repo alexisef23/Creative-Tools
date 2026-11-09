@@ -29,6 +29,7 @@ import {
 } from '@/utils/whatsapp';
 import { LaserFontFamily, SeriesCategory } from '@/types';
 import LaserCanvasPreview from './LaserCanvasPreview';
+import { CreativeDiagonalRibbons } from './CreativeBrandLogo';
 
 const DENTAL_SPECIALTIES = [
   'ODONTOLOGÍA AVANZADA',
@@ -162,26 +163,35 @@ export default function LaserCustomizerStudio() {
   return (
     <section
       id="customizer-studio"
-      className="py-20 border-t border-white/10 bg-gradient-to-b from-zinc-950 via-slate-900/75 to-zinc-950"
+      className="relative overflow-hidden py-20 border-t border-white/10 bg-gradient-to-b from-[#0B0D13] via-[#11141E] to-[#0B0D13]"
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <CreativeDiagonalRibbons
+        position="top-right"
+        className="absolute -top-12 -right-28 opacity-35"
+      />
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Studio Header */}
         <div className="text-center max-w-3xl mx-auto mb-12">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-400/30 text-cyan-300 text-xs font-bold uppercase tracking-widest mb-3">
-            <Sparkles className="w-3.5 h-3.5" />
-            Estudio de Personalización y Pedidos Directos
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#11141E] border border-[#E5007D]/40 text-xs font-black uppercase tracking-widest mb-3">
+            <Sparkles className="w-3.5 h-3.5 text-[#E5007D]" />
+            <span className="text-white">CUSTOM</span>
+            <span className="text-[#F39200]">DESIGN</span>
+            <span className="text-[#00AEEF]">STUDIO</span>
           </div>
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-            Diseña tu Fresero y Envía tu Pedido con Imagen a Grabar
+          <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
+            Diseña tu Fresero y Envía tu{' '}
+            <span className="text-[#00AEEF]">Pedido</span> con{' '}
+            <span className="text-[#8CC63F]">Imagen a Grabar</span>
           </h2>
-          <p className="text-slate-400 text-sm sm:text-base mt-2">
+          <p className="text-slate-300 text-sm sm:text-base mt-2">
             Elige el color del aluminio anodizado, selecciona cualquiera de{' '}
-            <span className="text-cyan-300 font-semibold">
+            <span className="text-[#00AEEF] font-bold">
               nuestros diseños del catálogo
             </span>{' '}
             o sube tu propia imagen/logo. Al terminar, envía tu pedido junto con
             la imagen a grabar directamente a nuestro WhatsApp{' '}
-            <span className="text-emerald-400 font-bold">
+            <span className="text-[#8CC63F] font-extrabold">
               {WHATSAPP_DISPLAY_NUMBER}
             </span>
             .
@@ -198,13 +208,13 @@ export default function LaserCustomizerStudio() {
           {/* Right Column: Step-by-Step Configuration Panels */}
           <div className="lg:col-span-5 space-y-6">
             {/* STEP 1: Box Color Selection */}
-            <div className="p-6 rounded-2xl backdrop-blur-md bg-white/[0.04] border border-white/10">
+            <div className="p-6 rounded-2xl bg-[#11141E] border border-[#009FE3]/35 shadow-lg">
               <div className="flex items-center justify-between mb-4">
-                <span className="text-xs font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-2">
-                  <Palette className="w-4 h-4" />
+                <span className="text-xs font-black uppercase tracking-wider text-[#00AEEF] flex items-center gap-2">
+                  <Palette className="w-4 h-4 text-[#E5007D]" />
                   Paso 1 • Color del Fresero Anodizado
                 </span>
-                <span className="text-xs font-semibold text-white">
+                <span className="text-xs font-extrabold text-[#F39200]">
                   {selectedColor.name}
                 </span>
               </div>
@@ -219,8 +229,8 @@ export default function LaserCustomizerStudio() {
                       onClick={() => setSelectedColor(color)}
                       className={`p-3 rounded-xl border text-left transition-all flex items-center gap-3 ${
                         isSelected
-                          ? 'bg-cyan-500/15 border-cyan-400 ring-1 ring-cyan-400/50'
-                          : 'bg-white/5 hover:bg-white/10 border-white/10'
+                          ? 'bg-[#009FE3]/15 border-[#00AEEF] ring-1 ring-[#E5007D]/50'
+                          : 'bg-[#0B0D13] hover:bg-white/10 border-white/10'
                       }`}
                     >
                       <span
@@ -248,17 +258,17 @@ export default function LaserCustomizerStudio() {
             </div>
 
             {/* STEP 2: Design Source Selection (Presets from Catalogo vs Custom Upload) */}
-            <div className="p-6 rounded-2xl backdrop-blur-md bg-white/[0.04] border border-white/10 space-y-4">
+            <div className="p-6 rounded-2xl bg-[#11141E] border border-[#E5007D]/35 space-y-4 shadow-lg">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-2">
-                  <Sparkles className="w-4 h-4" />
+                <span className="text-xs font-black uppercase tracking-wider text-[#ff4da6] flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-[#F39200]" />
                   Paso 2 • Imagen o Diseño a Grabar
                 </span>
                 <button
                   type="button"
                   onClick={() => syncCatalogFromDisk()}
                   title="Buscar nuevas imágenes en la carpeta Catalogo"
-                  className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-400 hover:underline"
+                  className="inline-flex items-center gap-1 text-[11px] font-bold text-[#8CC63F] hover:underline"
                 >
                   <RefreshCw
                     className={`w-3 h-3 ${
@@ -270,13 +280,13 @@ export default function LaserCustomizerStudio() {
               </div>
 
               {/* Mode Switch Tabs */}
-              <div className="grid grid-cols-2 gap-2 p-1 rounded-xl bg-zinc-950/90 border border-white/10">
+              <div className="grid grid-cols-2 gap-2 p-1 rounded-xl bg-[#0B0D13] border border-white/15">
                 <button
                   type="button"
                   onClick={() => setDesignMode('preset')}
-                  className={`py-2.5 px-3 rounded-lg text-xs font-bold transition ${
+                  className={`py-2.5 px-3 rounded-lg text-xs font-extrabold transition ${
                     designMode === 'preset'
-                      ? 'bg-cyan-400 text-zinc-950 shadow'
+                      ? 'bg-gradient-to-r from-[#E5007D] to-[#009FE3] text-white shadow'
                       : 'text-slate-300 hover:text-white'
                   }`}
                 >
@@ -285,9 +295,9 @@ export default function LaserCustomizerStudio() {
                 <button
                   type="button"
                   onClick={() => setDesignMode('upload')}
-                  className={`py-2.5 px-3 rounded-lg text-xs font-bold transition ${
+                  className={`py-2.5 px-3 rounded-lg text-xs font-extrabold transition ${
                     designMode === 'upload'
-                      ? 'bg-cyan-400 text-zinc-950 shadow'
+                      ? 'bg-gradient-to-r from-[#E5007D] to-[#009FE3] text-white shadow'
                       : 'text-slate-300 hover:text-white'
                   }`}
                 >
@@ -304,10 +314,10 @@ export default function LaserCustomizerStudio() {
                         key={cat}
                         type="button"
                         onClick={() => setStudioSeriesFilter(cat)}
-                        className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold whitespace-nowrap transition ${
+                        className={`px-2.5 py-1 rounded-lg text-[11px] font-bold whitespace-nowrap transition ${
                           studioSeriesFilter === cat
-                            ? 'bg-cyan-500/25 text-cyan-300 border border-cyan-400/50'
-                            : 'bg-white/5 text-slate-400 hover:text-white'
+                            ? 'bg-[#009FE3]/25 text-[#00AEEF] border border-[#00AEEF]/60'
+                            : 'bg-[#0B0D13] text-slate-400 hover:text-white border border-white/10'
                         }`}
                       >
                         {cat}
@@ -326,8 +336,8 @@ export default function LaserCustomizerStudio() {
                           onClick={() => setSelectedPreset(preset)}
                           className={`p-2.5 rounded-xl border text-left transition flex items-center gap-2.5 ${
                             active
-                              ? 'bg-cyan-500/15 border-cyan-400 ring-1 ring-cyan-400/40'
-                              : 'bg-white/5 hover:bg-white/10 border-white/10'
+                              ? 'bg-[#009FE3]/15 border-[#00AEEF] ring-1 ring-[#E5007D]/50'
+                              : 'bg-[#0B0D13] hover:bg-white/10 border-white/10'
                           }`}
                         >
                           {preset.imageUrl ? (
@@ -340,18 +350,18 @@ export default function LaserCustomizerStudio() {
                               />
                             </div>
                           ) : (
-                            <div className="w-11 h-11 rounded-lg bg-zinc-900 p-1 shrink-0 flex items-center justify-center border border-white/10 text-[10px] font-mono text-cyan-300">
+                            <div className="w-11 h-11 rounded-lg bg-[#11141E] p-1 shrink-0 flex items-center justify-center border border-white/10 text-[10px] font-mono text-[#00AEEF]">
                               {preset.code}
                             </div>
                           )}
 
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center justify-between">
-                              <span className="text-[10px] font-mono font-bold text-cyan-300">
+                              <span className="text-[10px] font-mono font-bold text-[#F39200]">
                                 {preset.code}
                               </span>
                               {active && (
-                                <CheckCircle2 className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                                <CheckCircle2 className="w-3.5 h-3.5 text-[#8CC63F] shrink-0" />
                               )}
                             </div>
                             <p className="text-xs font-semibold text-white truncate">
@@ -372,7 +382,7 @@ export default function LaserCustomizerStudio() {
                     onDragOver={(e) => e.preventDefault()}
                     onDrop={handleDrop}
                     onClick={() => fileInputRef.current?.click()}
-                    className="cursor-pointer border-2 border-dashed border-cyan-400/40 hover:border-cyan-400 rounded-2xl p-6 text-center bg-cyan-500/5 hover:bg-cyan-500/10 transition"
+                    className="cursor-pointer border-2 border-dashed border-[#00AEEF]/50 hover:border-[#E5007D] rounded-2xl p-6 text-center bg-[#0B0D13] hover:bg-[#009FE3]/10 transition"
                   >
                     <input
                       ref={fileInputRef}
@@ -381,8 +391,8 @@ export default function LaserCustomizerStudio() {
                       onChange={handleFileChange}
                       className="hidden"
                     />
-                    <Upload className="w-8 h-8 text-cyan-400 mx-auto mb-2" />
-                    <p className="text-xs font-bold text-white">
+                    <Upload className="w-8 h-8 text-[#00AEEF] mx-auto mb-2" />
+                    <p className="text-xs font-extrabold text-white">
                       Arrastra la imagen o logo a grabar aquí o haz clic
                     </p>
                     <p className="text-[11px] text-slate-400 mt-1">
@@ -390,7 +400,7 @@ export default function LaserCustomizerStudio() {
                       láser sobre la tapa del fresero.
                     </p>
                     {uploadedFileName && (
-                      <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-200 text-xs font-semibold">
+                      <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#8CC63F]/20 text-[#a8e05f] text-xs font-bold">
                         <FileImage className="w-3.5 h-3.5" />
                         {uploadedFileName}
                       </div>
@@ -399,10 +409,10 @@ export default function LaserCustomizerStudio() {
 
                   {/* Laser Threshold Controls for Uploaded Logos */}
                   {uploadedImageSrc && (
-                    <div className="p-3.5 rounded-xl bg-white/5 border border-white/10 space-y-3">
+                    <div className="p-3.5 rounded-xl bg-[#0B0D13] border border-white/15 space-y-3">
                       <div className="flex items-center justify-between text-xs">
                         <span className="text-slate-300 font-semibold flex items-center gap-1.5">
-                          <Sliders className="w-3.5 h-3.5 text-cyan-400" />
+                          <Sliders className="w-3.5 h-3.5 text-[#00AEEF]" />
                           Intensidad del Grabado Láser
                         </span>
                         <button
@@ -412,7 +422,7 @@ export default function LaserCustomizerStudio() {
                               invertUpload: !transform.invertUpload,
                             })
                           }
-                          className="px-2.5 py-1 rounded-md bg-white/10 hover:bg-white/15 text-cyan-300 font-semibold text-[11px]"
+                          className="px-2.5 py-1 rounded-md bg-white/10 hover:bg-white/15 text-[#00AEEF] font-bold text-[11px]"
                         >
                           {transform.invertUpload
                             ? 'Modo: Invertido (Logos claros)'
@@ -429,7 +439,7 @@ export default function LaserCustomizerStudio() {
                             contrastThreshold: parseInt(e.target.value, 10),
                           })
                         }
-                        className="w-full accent-cyan-400 cursor-pointer"
+                        className="w-full accent-[#00AEEF] cursor-pointer"
                       />
                     </div>
                   )}
@@ -439,8 +449,8 @@ export default function LaserCustomizerStudio() {
               {/* Custom Doctor / Clinic Text & Dental Specialty Input */}
               <div className="pt-2 space-y-3">
                 <div>
-                  <label className="text-xs font-semibold text-slate-300 flex items-center gap-1.5 mb-1.5">
-                    <Type className="w-3.5 h-3.5 text-cyan-400" />
+                  <label className="text-xs font-bold text-slate-200 flex items-center gap-1.5 mb-1.5">
+                    <Type className="w-3.5 h-3.5 text-[#00AEEF]" />
                     Texto Principal en Tapa (Nombre del Dr. / Clínica):
                   </label>
                   <input
@@ -451,14 +461,14 @@ export default function LaserCustomizerStudio() {
                       updateTransform({ customText: e.target.value })
                     }
                     placeholder="Ej. DRA. SOFÍA RAMÍREZ"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-zinc-950/90 border border-white/15 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-cyan-400"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#0B0D13] border border-white/15 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-[#00AEEF]"
                   />
                 </div>
 
                 {/* Dental Specialty Sub-tag Selector */}
                 <div>
-                  <label className="text-xs font-semibold text-slate-300 flex items-center gap-1.5 mb-1.5">
-                    <Award className="w-3.5 h-3.5 text-cyan-400" />
+                  <label className="text-xs font-bold text-slate-200 flex items-center gap-1.5 mb-1.5">
+                    <Award className="w-3.5 h-3.5 text-[#F39200]" />
                     Subtítulo / Especialidad Odontológica:
                   </label>
                   <div className="flex items-center gap-1.5 overflow-x-auto pb-1.5 scrollbar-thin">
@@ -469,8 +479,8 @@ export default function LaserCustomizerStudio() {
                         onClick={() => updateTransform({ specialtyTag: spec })}
                         className={`px-2.5 py-1 rounded-lg text-[10px] font-bold whitespace-nowrap border transition ${
                           transform.specialtyTag === spec
-                            ? 'bg-cyan-500/20 border-cyan-400 text-cyan-300'
-                            : 'bg-zinc-950 border-white/10 text-slate-400 hover:text-white'
+                            ? 'bg-[#E5007D]/20 border-[#E5007D] text-[#ff66b5]'
+                            : 'bg-[#0B0D13] border-white/10 text-slate-400 hover:text-white'
                         }`}
                       >
                         {spec}
@@ -479,7 +489,7 @@ export default function LaserCustomizerStudio() {
                     <button
                       type="button"
                       onClick={() => updateTransform({ specialtyTag: '' })}
-                      className="px-2.5 py-1 rounded-lg text-[10px] font-bold whitespace-nowrap bg-zinc-950 border border-white/10 text-slate-400 hover:text-rose-300"
+                      className="px-2.5 py-1 rounded-lg text-[10px] font-bold whitespace-nowrap bg-[#0B0D13] border border-white/10 text-slate-400 hover:text-rose-300"
                     >
                       Sin Subtítulo
                     </button>
@@ -499,10 +509,10 @@ export default function LaserCustomizerStudio() {
                       key={font.id}
                       type="button"
                       onClick={() => updateTransform({ fontFamily: font.id })}
-                      className={`py-1.5 px-2 rounded-lg text-[11px] font-semibold border transition ${
+                      className={`py-1.5 px-2 rounded-lg text-[11px] font-bold border transition ${
                         transform.fontFamily === font.id
-                          ? 'bg-cyan-500/20 border-cyan-400 text-cyan-300'
-                          : 'bg-zinc-950 border-white/10 text-slate-400 hover:text-white'
+                          ? 'bg-[#009FE3]/20 border-[#00AEEF] text-[#00AEEF]'
+                          : 'bg-[#0B0D13] border-white/10 text-slate-400 hover:text-white'
                       }`}
                     >
                       {font.label}
@@ -513,13 +523,13 @@ export default function LaserCustomizerStudio() {
             </div>
 
             {/* STEP 3: Realizar Pedido Directo por WhatsApp (+52 1 614 552 5335) */}
-            <div className="p-6 rounded-2xl backdrop-blur-md bg-white/[0.04] border border-white/10 space-y-4">
+            <div className="p-6 rounded-2xl bg-[#11141E] border border-[#8CC63F]/40 space-y-4 shadow-lg">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
+                <span className="text-xs font-black uppercase tracking-wider text-[#8CC63F] flex items-center gap-1.5">
                   <UserCheck className="w-4 h-4" />
                   Paso 3 • Datos para Enviar Pedido
                 </span>
-                <span className="text-[11px] font-mono text-emerald-300 font-semibold">
+                <span className="text-[11px] font-mono text-[#a8e05f] font-bold">
                   {WHATSAPP_DISPLAY_NUMBER}
                 </span>
               </div>
@@ -530,14 +540,14 @@ export default function LaserCustomizerStudio() {
                   value={doctorName}
                   onChange={(e) => setDoctorName(e.target.value)}
                   placeholder="Tu Nombre / Doctor(a) (Opcional)"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-zinc-950 border border-white/15 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-cyan-400"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-[#0B0D13] border border-white/15 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-[#8CC63F]"
                 />
                 <input
                   type="text"
                   value={clinicName}
                   onChange={(e) => setClinicName(e.target.value)}
                   placeholder="Clínica / Ciudad (Opcional)"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-zinc-950 border border-white/15 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-cyan-400"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-[#0B0D13] border border-white/15 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-[#8CC63F]"
                 />
               </div>
 
@@ -546,20 +556,20 @@ export default function LaserCustomizerStudio() {
                 value={orderNotes}
                 onChange={(e) => setOrderNotes(e.target.value)}
                 placeholder="Indicaciones especiales sobre tu grabado (Opcional)..."
-                className="w-full px-3.5 py-2.5 rounded-xl bg-zinc-950 border border-white/15 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-cyan-400"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-[#0B0D13] border border-white/15 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-[#8CC63F]"
               />
 
               {/* Live Configuration Summary Box */}
-              <div className="p-3.5 rounded-xl bg-zinc-950/80 border border-white/10 text-xs space-y-1.5 text-slate-300">
+              <div className="p-3.5 rounded-xl bg-[#0B0D13] border border-white/10 text-xs space-y-1.5 text-slate-300">
                 <div className="flex justify-between">
                   <span className="text-slate-400">Color del Fresero:</span>
-                  <span className="font-semibold text-white">
+                  <span className="font-bold text-white">
                     {selectedColor.name}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-400">Imagen a Grabar:</span>
-                  <span className="font-semibold text-cyan-300">
+                  <span className="font-bold text-[#00AEEF]">
                     {designMode === 'preset'
                       ? `${selectedPreset.code} • ${selectedPreset.title}`
                       : uploadedFileName || 'Imagen / Logo Personalizado'}
@@ -567,7 +577,7 @@ export default function LaserCustomizerStudio() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-400">Atención Directa:</span>
-                  <span className="font-semibold text-emerald-400">
+                  <span className="font-bold text-[#8CC63F]">
                     WhatsApp {WHATSAPP_DISPLAY_NUMBER}
                   </span>
                 </div>
@@ -577,9 +587,9 @@ export default function LaserCustomizerStudio() {
               <button
                 type="button"
                 onClick={handleDirectWhatsAppOrder}
-                className="w-full inline-flex items-center justify-center gap-2.5 py-4 px-5 rounded-xl bg-gradient-to-r from-emerald-400 via-emerald-500 to-teal-500 text-zinc-950 font-extrabold text-xs sm:text-sm shadow-lg hover:brightness-110 transition"
+                className="w-full inline-flex items-center justify-center gap-2.5 py-4 px-5 rounded-xl bg-gradient-to-r from-[#8CC63F] via-[#76B82A] to-[#009FE3] text-[#0B0D13] font-black text-xs sm:text-sm shadow-lime-neon hover:brightness-110 transition"
               >
-                <MessageCircle className="w-5 h-5 fill-zinc-950" />
+                <MessageCircle className="w-5 h-5 fill-[#0B0D13]" />
                 Hacer Pedido + Enviar Imagen al {WHATSAPP_DISPLAY_NUMBER}
               </button>
 
@@ -587,7 +597,7 @@ export default function LaserCustomizerStudio() {
               <button
                 type="button"
                 onClick={handleAddToOrderList}
-                className="w-full inline-flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-white/5 hover:bg-white/10 text-cyan-300 border border-cyan-400/30 font-bold text-xs transition"
+                className="w-full inline-flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-[#E5007D]/15 hover:bg-[#E5007D]/25 text-[#ff66b5] border border-[#E5007D]/40 font-extrabold text-xs transition"
               >
                 <PlusCircle className="w-4 h-4" />
                 Agregar este Diseño a Mi Lista de Pedido (Varios Modelos)
@@ -595,8 +605,8 @@ export default function LaserCustomizerStudio() {
 
               {/* Helpful Notice when image is copied & downloaded */}
               {dispatchNotice && (
-                <div className="p-3.5 rounded-xl bg-emerald-500/15 border border-emerald-400/40 text-emerald-200 text-xs flex items-start gap-2.5 leading-relaxed">
-                  <Info className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                <div className="p-3.5 rounded-xl bg-[#8CC63F]/15 border border-[#8CC63F]/40 text-[#a8e05f] text-xs flex items-start gap-2.5 leading-relaxed">
+                  <Info className="w-4 h-4 text-[#8CC63F] shrink-0 mt-0.5" />
                   <span>{dispatchNotice}</span>
                 </div>
               )}

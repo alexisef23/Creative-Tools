@@ -1,57 +1,76 @@
 'use client';
 
 import React from 'react';
-import { Sparkles, ClipboardList, MessageCircle, Cpu } from 'lucide-react';
+import { Sparkles, ClipboardList, MessageCircle } from 'lucide-react';
 import { useCustomizerStore } from '@/hooks/useCustomizerStore';
-import { WHATSAPP_DISPLAY_NUMBER, WHATSAPP_ORDER_NUMBER } from '@/utils/whatsapp';
+import {
+  WHATSAPP_DISPLAY_NUMBER,
+  WHATSAPP_ORDER_NUMBER,
+} from '@/utils/whatsapp';
+import { CreativeMolarIcon } from './CreativeBrandLogo';
 
 export default function Navbar() {
   const { orderList, setOrderDrawerOpen } = useCustomizerStore();
 
   return (
-    <header className="sticky top-0 z-40 w-full backdrop-blur-xl bg-zinc-950/80 border-b border-white/10">
+    <header className="sticky top-0 z-40 w-full backdrop-blur-xl bg-[#0B0D13]/90 border-b border-white/10">
+      {/* Signature Creative Tools 5-Color Spectrum Top Strip */}
+      <div className="h-1.5 w-full creative-border-top" />
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-        {/* Brand Logo */}
-        <a href="#" className="flex items-center gap-3 group">
-          <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-cyan-400 via-cyan-500 to-blue-600 p-[1px] shadow-laser-neon">
-            <div className="w-full h-full bg-zinc-950 rounded-[11px] flex items-center justify-center group-hover:bg-zinc-900 transition">
-              <Cpu className="w-6 h-6 text-cyan-400" />
-            </div>
+        {/* Official Creative Tools Brand Identity */}
+        <a href="#" className="flex items-center gap-3.5 group">
+          <div className="w-12 h-12 rounded-2xl bg-[#11141E] border border-white/15 flex items-center justify-center shadow-laser-neon group-hover:scale-105 transition-transform">
+            <CreativeMolarIcon className="w-8 h-8" />
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-extrabold text-xl tracking-tight text-white">
-                CREATIVE <span className="text-cyan-400">TOOLS</span>
-              </span>
-              <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider bg-cyan-500/10 text-cyan-300 border border-cyan-500/30">
-                Dental Laser Lab
-              </span>
+
+          <div className="flex items-center gap-3">
+            <div>
+              <div className="flex items-baseline gap-2">
+                <span className="font-black text-xl tracking-wider text-white">
+                  CREATIVE
+                </span>
+                <span className="font-light text-sm tracking-[0.32em] text-slate-200 uppercase">
+                  TOOLS
+                </span>
+              </div>
+              <p className="text-[10px] font-bold tracking-widest uppercase text-[#00AEEF]">
+                Herramientas que Inspiran Precisión
+              </p>
             </div>
-            <p className="text-xs text-slate-400">
-              Freseros de Aluminio Grado Médico • Pedidos: {WHATSAPP_DISPLAY_NUMBER}
-            </p>
+
+            <div className="hidden xl:block h-8 w-[1px] bg-white/15 mx-1" />
+
+            <div className="hidden xl:block">
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-[#E5007D]/15 text-[#ff4da6] border border-[#E5007D]/35">
+                Custom <span className="text-[#F39200] mx-1">Design</span> Series
+              </span>
+              <p className="text-[11px] text-slate-400 mt-0.5">
+                Pedidos: {WHATSAPP_DISPLAY_NUMBER}
+              </p>
+            </div>
           </div>
         </a>
 
         {/* Navigation Links */}
-        <nav className="hidden md:flex items-center gap-7 text-sm font-medium text-slate-300">
+        <nav className="hidden md:flex items-center gap-7 text-sm font-semibold text-slate-200">
           <a
             href="#catalogos-referencia"
-            className="hover:text-cyan-400 transition-colors"
+            className="hover:text-[#00AEEF] transition-colors"
           >
             Catálogos de Referencia
           </a>
           <a
             href="#catalogo"
-            className="hover:text-cyan-400 transition-colors"
+            className="hover:text-[#8CC63F] transition-colors"
           >
             Colecciones por Serie
           </a>
           <a
             href="#customizer-studio"
-            className="flex items-center gap-1.5 text-cyan-400 hover:text-cyan-300 transition-colors"
+            className="flex items-center gap-1.5 text-[#F39200] hover:text-[#ffaa2b] transition-colors"
           >
-            <Sparkles className="w-4 h-4" />
+            <Sparkles className="w-4 h-4 text-[#E5007D]" />
             Estudio de Grabado Láser
           </a>
         </nav>
@@ -64,21 +83,25 @@ export default function Navbar() {
             )}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="hidden sm:inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 transition"
+            className="hidden sm:inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold bg-[#8CC63F]/15 hover:bg-[#8CC63F]/25 text-[#a8e05f] border border-[#8CC63F]/35 transition"
           >
-            <MessageCircle className="w-4 h-4" />
+            <MessageCircle className="w-4 h-4 text-[#8CC63F]" />
             {WHATSAPP_DISPLAY_NUMBER}
           </a>
 
           <button
             onClick={() => setOrderDrawerOpen(true)}
             aria-label="Abrir mi lista de pedido"
-            className="relative inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-zinc-950 font-bold text-sm shadow-laser-neon hover:brightness-110 transition"
+            className="relative inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#E5007D] via-[#009FE3] to-[#8CC63F] p-[1.5px] shadow-laser-neon hover:brightness-110 transition"
           >
-            <ClipboardList className="w-4 h-4 stroke-[2.5]" />
-            <span className="hidden sm:inline">Mi Pedido</span>
-            <span className="px-2 py-0.5 text-xs rounded-full bg-zinc-950 text-cyan-300 font-extrabold">
-              {orderList.length}
+            <span className="inline-flex items-center gap-2 px-3.5 py-2 rounded-[10px] bg-[#0B0D13] text-white font-extrabold text-xs sm:text-sm">
+              <ClipboardList className="w-4 h-4 text-[#00AEEF]" />
+              <span className="hidden sm:inline">Mi Pedido</span>
+              {orderList.length > 0 && (
+                <span className="px-2 py-0.5 text-xs rounded-full bg-[#E5007D] text-white font-black">
+                  {orderList.length}
+                </span>
+              )}
             </span>
           </button>
         </div>

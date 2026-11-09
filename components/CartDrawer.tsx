@@ -43,7 +43,6 @@ export default function CartDrawer() {
     e.preventDefault();
     const whatsappUrl = buildOrderListWhatsAppUrl(orderList, customer);
 
-    // Find first item with a canvas snapshot or image to copy/download automatically
     const primaryItem = orderList.find((i) => i.previewDataUrl) || orderList[0];
 
     await sendOrderWithImageToWhatsApp({
@@ -65,37 +64,41 @@ export default function CartDrawer() {
       />
 
       <div className="fixed inset-y-0 right-0 max-w-full flex pl-10">
-        <div className="w-screen max-w-md bg-zinc-950 border-l border-white/15 shadow-2xl flex flex-col justify-between">
-          {/* Drawer Header */}
-          <div className="p-5 border-b border-white/10 flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <ClipboardList className="w-5 h-5 text-cyan-400" />
-              <div>
-                <h3 className="text-base font-extrabold text-white">
-                  {step === 'list' && 'Mi Lista de Pedido de Freseros'}
-                  {step === 'details' && 'Datos para Enviar tu Pedido'}
-                  {step === 'sent' && '¡Pedido Enviado a WhatsApp!'}
-                </h3>
-                <p className="text-[11px] text-emerald-400 font-mono">
-                  Atención directa: {WHATSAPP_DISPLAY_NUMBER}
-                </p>
+        <div className="w-screen max-w-md bg-[#0B0D13] border-l border-white/15 shadow-2xl flex flex-col justify-between">
+          {/* Top Spectrum Strip */}
+          <div>
+            <div className="h-1.5 w-full creative-border-top" />
+            {/* Drawer Header */}
+            <div className="p-5 border-b border-white/10 flex items-center justify-between bg-[#11141E]">
+              <div className="flex items-center gap-2.5">
+                <ClipboardList className="w-5 h-5 text-[#00AEEF]" />
+                <div>
+                  <h3 className="text-base font-black text-white">
+                    {step === 'list' && 'Mi Lista de Pedido de Freseros'}
+                    {step === 'details' && 'Datos para Enviar tu Pedido'}
+                    {step === 'sent' && '¡Pedido Enviado a WhatsApp!'}
+                  </h3>
+                  <p className="text-[11px] text-[#8CC63F] font-mono font-bold">
+                    Atención directa: {WHATSAPP_DISPLAY_NUMBER}
+                  </p>
+                </div>
               </div>
+              <button
+                type="button"
+                onClick={() => setOrderDrawerOpen(false)}
+                className="p-2 rounded-lg bg-white/5 hover:bg-[#E5007D] text-slate-400 hover:text-white transition"
+              >
+                <X className="w-5 h-5" />
+              </button>
             </div>
-            <button
-              type="button"
-              onClick={() => setOrderDrawerOpen(false)}
-              className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white"
-            >
-              <X className="w-5 h-5" />
-            </button>
           </div>
 
           {/* Drawer Body */}
           <div className="p-5 overflow-y-auto flex-1 space-y-4">
             {orderList.length === 0 && step !== 'sent' ? (
               <div className="text-center py-16 space-y-3">
-                <ClipboardList className="w-12 h-12 text-slate-600 mx-auto" />
-                <p className="text-base font-bold text-white">
+                <ClipboardList className="w-12 h-12 text-[#00AEEF]/50 mx-auto" />
+                <p className="text-base font-extrabold text-white">
                   Aún no has agregado diseños a tu pedido
                 </p>
                 <p className="text-xs text-slate-400 max-w-xs mx-auto">
@@ -108,14 +111,14 @@ export default function CartDrawer() {
               orderList.map((item) => (
                 <div
                   key={item.orderItemId}
-                  className="p-3.5 rounded-2xl bg-white/5 border border-white/10 flex gap-3.5 items-center"
+                  className="p-3.5 rounded-2xl bg-[#11141E] border border-white/15 flex gap-3.5 items-center"
                 >
                   {/* Thumbnail Preview */}
                   {item.previewDataUrl ? (
                     <img
                       src={item.previewDataUrl}
                       alt={item.title}
-                      className="w-20 h-16 object-contain rounded-xl border border-white/15 shrink-0 bg-white p-1"
+                      className="w-20 h-16 object-contain rounded-xl border border-[#00AEEF]/40 shrink-0 bg-white p-1"
                     />
                   ) : (
                     <div
@@ -130,14 +133,14 @@ export default function CartDrawer() {
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1.5">
-                      <span className="px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-mono text-[10px] font-bold">
+                      <span className="px-1.5 py-0.5 rounded bg-[#009FE3]/20 text-[#00AEEF] font-mono text-[10px] font-bold">
                         {item.code}
                       </span>
-                      <p className="text-xs font-bold text-white truncate">
+                      <p className="text-xs font-extrabold text-white truncate">
                         {item.title}
                       </p>
                     </div>
-                    <p className="text-[11px] text-cyan-300 mt-0.5">
+                    <p className="text-[11px] text-[#F39200] font-semibold mt-0.5">
                       Color Fresero: {item.color.name}
                     </p>
                     {item.customText && (
@@ -150,7 +153,7 @@ export default function CartDrawer() {
                       <a
                         href={item.previewDataUrl}
                         download={`fresero-${item.code.toLowerCase()}.png`}
-                        className="inline-flex items-center gap-1 text-[10px] text-emerald-400 hover:underline mt-1 font-semibold"
+                        className="inline-flex items-center gap-1 text-[10px] text-[#8CC63F] hover:underline mt-1 font-bold"
                       >
                         <Download className="w-3 h-3" />
                         Descargar imagen a grabar
@@ -161,7 +164,7 @@ export default function CartDrawer() {
                   <button
                     type="button"
                     onClick={() => removeFromOrderList(item.orderItemId)}
-                    className="p-1.5 text-slate-400 hover:text-rose-400"
+                    className="p-1.5 text-slate-400 hover:text-[#E5007D]"
                     title="Quitar de la lista"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -174,8 +177,8 @@ export default function CartDrawer() {
                 onSubmit={handleSendCompleteOrder}
                 className="space-y-3.5 text-xs"
               >
-                <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center gap-2 text-emerald-200">
-                  <Building2 className="w-4 h-4 shrink-0 text-emerald-400" />
+                <div className="p-3 rounded-xl bg-[#8CC63F]/15 border border-[#8CC63F]/40 flex items-center gap-2 text-[#a8e05f]">
+                  <Building2 className="w-4 h-4 shrink-0 text-[#8CC63F]" />
                   <span>
                     Sin pagos en línea: Tu pedido y la imagen a grabar se envían
                     directamente a nuestro WhatsApp{' '}
@@ -184,7 +187,7 @@ export default function CartDrawer() {
                 </div>
 
                 <div>
-                  <label className="block text-slate-300 font-semibold mb-1">
+                  <label className="block text-slate-200 font-bold mb-1">
                     Nombre del Doctor(a) *
                   </label>
                   <input
@@ -195,12 +198,12 @@ export default function CartDrawer() {
                       setCustomer({ ...customer, doctorName: e.target.value })
                     }
                     placeholder="Ej. Dr. Alejandro Vega"
-                    className="w-full px-3 py-2.5 rounded-xl bg-zinc-900 border border-white/15 text-white"
+                    className="w-full px-3 py-2.5 rounded-xl bg-[#11141E] border border-white/15 text-white focus:outline-none focus:border-[#00AEEF]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-slate-300 font-semibold mb-1">
+                  <label className="block text-slate-200 font-bold mb-1">
                     Clínica Dental / Consultorio
                   </label>
                   <input
@@ -210,13 +213,13 @@ export default function CartDrawer() {
                       setCustomer({ ...customer, clinicName: e.target.value })
                     }
                     placeholder="Ej. Vega Dental Studio"
-                    className="w-full px-3 py-2.5 rounded-xl bg-zinc-900 border border-white/15 text-white"
+                    className="w-full px-3 py-2.5 rounded-xl bg-[#11141E] border border-white/15 text-white focus:outline-none focus:border-[#00AEEF]"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-2.5">
                   <div>
-                    <label className="block text-slate-300 font-semibold mb-1">
+                    <label className="block text-slate-200 font-bold mb-1">
                       Tu WhatsApp / Teléfono *
                     </label>
                     <input
@@ -227,11 +230,11 @@ export default function CartDrawer() {
                         setCustomer({ ...customer, phone: e.target.value })
                       }
                       placeholder="Ej. 614 123 4567"
-                      className="w-full px-3 py-2.5 rounded-xl bg-zinc-900 border border-white/15 text-white"
+                      className="w-full px-3 py-2.5 rounded-xl bg-[#11141E] border border-white/15 text-white focus:outline-none focus:border-[#00AEEF]"
                     />
                   </div>
                   <div>
-                    <label className="block text-slate-300 font-semibold mb-1">
+                    <label className="block text-slate-200 font-bold mb-1">
                       Ciudad / Estado *
                     </label>
                     <input
@@ -242,13 +245,13 @@ export default function CartDrawer() {
                         setCustomer({ ...customer, city: e.target.value })
                       }
                       placeholder="Ej. Chihuahua, Chih."
-                      className="w-full px-3 py-2.5 rounded-xl bg-zinc-900 border border-white/15 text-white"
+                      className="w-full px-3 py-2.5 rounded-xl bg-[#11141E] border border-white/15 text-white focus:outline-none focus:border-[#00AEEF]"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-slate-300 font-semibold mb-1">
+                  <label className="block text-slate-200 font-bold mb-1">
                     Dirección o Sucursal de Entrega (Opcional)
                   </label>
                   <input
@@ -258,12 +261,12 @@ export default function CartDrawer() {
                       setCustomer({ ...customer, address: e.target.value })
                     }
                     placeholder="Calle, número, colonia y código postal"
-                    className="w-full px-3 py-2.5 rounded-xl bg-zinc-900 border border-white/15 text-white"
+                    className="w-full px-3 py-2.5 rounded-xl bg-[#11141E] border border-white/15 text-white focus:outline-none focus:border-[#00AEEF]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-slate-300 font-semibold mb-1">
+                  <label className="block text-slate-200 font-bold mb-1">
                     Comentarios o Detalles del Grabado (Opcional)
                   </label>
                   <textarea
@@ -273,19 +276,19 @@ export default function CartDrawer() {
                       setCustomer({ ...customer, notes: e.target.value })
                     }
                     placeholder="Indica cualquier detalle especial sobre tu imagen o logo..."
-                    className="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-white/15 text-white"
+                    className="w-full px-3 py-2 rounded-xl bg-[#11141E] border border-white/15 text-white focus:outline-none focus:border-[#00AEEF]"
                   />
                 </div>
               </form>
             ) : (
               <div className="py-8 text-center space-y-4">
-                <CheckCircle2 className="w-14 h-14 text-emerald-400 mx-auto" />
-                <h4 className="text-xl font-extrabold text-white">
+                <CheckCircle2 className="w-14 h-14 text-[#8CC63F] mx-auto" />
+                <h4 className="text-xl font-black text-white">
                   ¡Tu Pedido e Imagen están Listos!
                 </h4>
                 <p className="text-xs text-slate-300 leading-relaxed">
                   Se abrió la ventana de WhatsApp con el número{' '}
-                  <span className="text-emerald-400 font-bold">
+                  <span className="text-[#8CC63F] font-bold">
                     {WHATSAPP_DISPLAY_NUMBER}
                   </span>{' '}
                   y la imagen de tu diseño se copió automáticamente al
@@ -310,14 +313,14 @@ export default function CartDrawer() {
 
           {/* Drawer Footer */}
           {orderList.length > 0 && step !== 'sent' && (
-            <div className="p-5 border-t border-white/10 bg-zinc-900/70 space-y-3">
+            <div className="p-5 border-t border-white/10 bg-[#11141E] space-y-3">
               {step === 'list' ? (
                 <button
                   type="button"
                   onClick={() => setStep('details')}
-                  className="w-full inline-flex items-center justify-center gap-2 py-3.5 px-5 rounded-xl bg-gradient-to-r from-emerald-400 to-teal-500 text-zinc-950 font-extrabold text-sm shadow-lg"
+                  className="w-full inline-flex items-center justify-center gap-2 py-3.5 px-5 rounded-xl bg-gradient-to-r from-[#8CC63F] to-[#009FE3] text-[#0B0D13] font-black text-sm shadow-lg"
                 >
-                  <MessageCircle className="w-4 h-4 fill-zinc-950" />
+                  <MessageCircle className="w-4 h-4 fill-[#0B0D13]" />
                   Continuar para Enviar Pedido por WhatsApp
                 </button>
               ) : (
@@ -332,9 +335,9 @@ export default function CartDrawer() {
                   <button
                     type="submit"
                     form="order-form"
-                    className="flex-1 inline-flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-400 to-teal-500 text-zinc-950 font-extrabold text-xs sm:text-sm shadow-lg"
+                    className="flex-1 inline-flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-gradient-to-r from-[#8CC63F] to-[#009FE3] text-[#0B0D13] font-black text-xs sm:text-sm shadow-lg"
                   >
-                    <MessageCircle className="w-4 h-4 fill-zinc-950" />
+                    <MessageCircle className="w-4 h-4 fill-[#0B0D13]" />
                     Enviar Pedido + Imagen al {WHATSAPP_DISPLAY_NUMBER}
                   </button>
                 </div>

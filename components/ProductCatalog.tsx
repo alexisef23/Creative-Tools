@@ -19,7 +19,7 @@ import {
   SERIES_CATEGORIES,
 } from '@/utils/catalogData';
 import { useCustomizerStore } from '@/hooks/useCustomizerStore';
-import { ProductItem, SeriesCategory } from '@/types';
+import { ProductItem } from '@/types';
 import {
   buildSingleOrderWhatsAppUrl,
   WHATSAPP_DISPLAY_NUMBER,
@@ -108,18 +108,20 @@ export default function ProductCatalog() {
       {/* Section Header */}
       <div className="flex flex-col lg:flex-row lg:items-end justify-between mb-8 gap-6">
         <div>
-          <div className="inline-flex items-center gap-2 text-cyan-400 text-xs font-bold uppercase tracking-widest mb-2">
-            <Layers className="w-4 h-4" />
+          <div className="inline-flex items-center gap-2 text-[#00AEEF] text-xs font-black uppercase tracking-widest mb-2">
+            <Layers className="w-4 h-4 text-[#E5007D]" />
             Catálogo Oficial Creative Tools
           </div>
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-            Colecciones & Diseños para Pedido Directo
+          <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
+            Colecciones &{' '}
+            <span className="text-[#00AEEF]">Diseños</span>{' '}
+            <span className="text-[#8CC63F]">Personalizados</span>
           </h2>
-          <p className="text-slate-400 text-sm sm:text-base mt-2 max-w-2xl">
+          <p className="text-slate-300 text-sm sm:text-base mt-2 max-w-2xl">
             Explora todos los diseños oficiales por serie. Puedes personalizar
             el color del aluminio anodizado y tu nombre en el Estudio Láser o
             solicitar tu pedido directamente por WhatsApp al{' '}
-            <span className="text-emerald-400 font-semibold">
+            <span className="text-[#8CC63F] font-extrabold">
               {WHATSAPP_DISPLAY_NUMBER}
             </span>
             .
@@ -129,23 +131,23 @@ export default function ProductCatalog() {
         {/* Search & View Mode Switcher */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
           <div className="relative">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-[#00AEEF] absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Buscar ej. Ferrari, Gojo, Messi, RAC-01..."
-              className="w-full sm:w-64 pl-9 pr-4 py-2.5 rounded-xl bg-white/5 border border-white/15 text-xs text-white placeholder:text-slate-400 focus:outline-none focus:border-cyan-400"
+              className="w-full sm:w-64 pl-9 pr-4 py-2.5 rounded-xl bg-[#11141E] border border-white/15 text-xs text-white placeholder:text-slate-400 focus:outline-none focus:border-[#00AEEF]"
             />
           </div>
 
-          <div className="inline-flex p-1 rounded-xl bg-zinc-900 border border-white/10">
+          <div className="inline-flex p-1 rounded-xl bg-[#11141E] border border-white/15">
             <button
               type="button"
               onClick={() => setViewMode('anodized')}
-              className={`px-3 py-2 rounded-lg text-xs font-bold transition ${
+              className={`px-3 py-2 rounded-lg text-xs font-extrabold transition ${
                 viewMode === 'anodized'
-                  ? 'bg-cyan-400 text-zinc-950 shadow'
+                  ? 'bg-gradient-to-r from-[#E5007D] to-[#009FE3] text-white shadow'
                   : 'text-slate-300 hover:text-white'
               }`}
             >
@@ -154,9 +156,9 @@ export default function ProductCatalog() {
             <button
               type="button"
               onClick={() => setViewMode('stencil')}
-              className={`px-3 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${
+              className={`px-3 py-2 rounded-lg text-xs font-extrabold transition flex items-center gap-1.5 ${
                 viewMode === 'stencil'
-                  ? 'bg-cyan-400 text-zinc-950 shadow'
+                  ? 'bg-gradient-to-r from-[#E5007D] to-[#009FE3] text-white shadow'
                   : 'text-slate-300 hover:text-white'
               }`}
             >
@@ -167,7 +169,7 @@ export default function ProductCatalog() {
         </div>
       </div>
 
-      {/* Category Filter Pills (10 Series + Todos) */}
+      {/* Category Filter Pills (10 Series + Todos without counts) */}
       <div className="flex items-center gap-2 overflow-x-auto pb-4 mb-8 scrollbar-thin">
         {SERIES_CATEGORIES.map((category) => {
           const isActive = selectedCategory === category;
@@ -176,10 +178,10 @@ export default function ProductCatalog() {
               key={category}
               type="button"
               onClick={() => setSelectedCategory(category)}
-              className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all flex items-center gap-2 ${
+              className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold whitespace-nowrap transition-all flex items-center gap-2 ${
                 isActive
-                  ? 'bg-gradient-to-r from-cyan-400 to-blue-500 text-zinc-950 font-bold shadow-laser-neon'
-                  : 'bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10'
+                  ? 'bg-gradient-to-r from-[#E5007D] via-[#F39200] to-[#009FE3] text-white shadow-laser-neon'
+                  : 'bg-[#11141E] hover:bg-white/10 text-slate-200 border border-white/15'
               }`}
             >
               <span>{category}</span>
@@ -208,7 +210,7 @@ export default function ProductCatalog() {
           return (
             <article
               key={product.id}
-              className="group rounded-2xl backdrop-blur-md bg-white/[0.04] hover:bg-white/[0.07] border border-white/10 hover:border-cyan-500/40 transition-all duration-300 flex flex-col overflow-hidden shadow-lg"
+              className="group rounded-2xl bg-[#11141E] hover:bg-[#151926] border border-white/15 hover:border-[#00AEEF]/60 transition-all duration-300 flex flex-col overflow-hidden shadow-lg"
             >
               {/* Card Visual Header */}
               <div
@@ -229,12 +231,12 @@ export default function ProductCatalog() {
 
                 {/* Top Badges */}
                 <div className="relative z-10 flex items-center justify-between">
-                  <span className="px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-zinc-950/80 text-cyan-300 border border-cyan-400/30 backdrop-blur-md">
+                  <span className="px-2.5 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-[#0B0D13]/85 text-[#00AEEF] border border-[#00AEEF]/40 backdrop-blur-md">
                     Serie {product.series}
                   </span>
 
                   <div className="flex items-center gap-1.5">
-                    <span className="px-2.5 py-1 rounded-full text-[11px] font-mono font-bold bg-zinc-950/80 text-white border border-white/15">
+                    <span className="px-2.5 py-1 rounded-full text-[11px] font-mono font-bold bg-[#0B0D13]/85 text-[#F39200] border border-[#F39200]/35">
                       {product.code}
                     </span>
                     {product.imageUrl && (
@@ -242,9 +244,9 @@ export default function ProductCatalog() {
                         type="button"
                         onClick={() => setLightboxProduct(product)}
                         title="Ampliar lámina de diseño"
-                        className="p-1.5 rounded-lg bg-zinc-950/75 hover:bg-zinc-900 text-white border border-white/20 transition"
+                        className="p-1.5 rounded-lg bg-[#0B0D13]/80 hover:bg-[#E5007D] text-white border border-white/20 transition"
                       >
-                        <Eye className="w-3.5 h-3.5 text-cyan-400" />
+                        <Eye className="w-3.5 h-3.5" />
                       </button>
                     )}
                   </div>
@@ -254,7 +256,7 @@ export default function ProductCatalog() {
                 <div className="relative z-10 my-auto flex items-center justify-center py-1">
                   {product.imageUrl ? (
                     viewMode === 'anodized' ? (
-                      <div className="relative w-48 h-32 rounded-xl overflow-hidden bg-white/95 p-2 shadow-lg border border-white/30 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
+                      <div className="relative w-48 h-32 rounded-xl overflow-hidden bg-white p-2 shadow-lg border-2 border-[#00AEEF]/40 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
                         <img
                           src={product.imageUrl}
                           alt={product.name}
@@ -284,7 +286,7 @@ export default function ProductCatalog() {
                             stroke={
                               viewMode === 'anodized'
                                 ? boxColor.laserTint
-                                : '#09090b'
+                                : '#0B0D13'
                             }
                             strokeWidth="2.4"
                             strokeLinecap="round"
@@ -299,11 +301,11 @@ export default function ProductCatalog() {
                 <div
                   className={`relative z-10 flex items-center justify-between text-[11px] font-mono ${
                     viewMode === 'anodized'
-                      ? 'text-white/90'
-                      : 'text-zinc-900 font-bold'
+                      ? 'text-white/95 font-semibold'
+                      : 'text-[#0B0D13] font-bold'
                   }`}
                 >
-                  <span>Aluminio Grado Médico</span>
+                  <span>Aluminio Resistente</span>
                   <span>{boxColor.name}</span>
                 </div>
               </div>
@@ -311,24 +313,28 @@ export default function ProductCatalog() {
               {/* Card Body */}
               <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
                 <div>
-                  <h3 className="text-base font-bold text-white group-hover:text-cyan-300 transition-colors">
+                  <h3 className="text-base font-extrabold text-white group-hover:text-[#00AEEF] transition-colors">
                     {product.name}
                   </h3>
-                  <p className="text-xs text-slate-400 mt-1">
+                  <p className="text-xs text-slate-300 mt-1">
                     {preset.description}
                   </p>
 
                   {/* Specs List */}
                   <div className="mt-3.5 pt-3 border-t border-white/10 space-y-1 text-xs text-slate-300">
                     <div className="flex items-center gap-2">
-                      <Check className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-                      <span>Aluminio Anodizado • Autoclavable 134°C</span>
+                      <Check className="w-3.5 h-3.5 text-[#8CC63F] shrink-0" />
+                      <span>
+                        Compatible con Piezas de Alta y Baja Velocidad
+                      </span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Check className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                      <Check className="w-3.5 h-3.5 text-[#00AEEF] shrink-0" />
                       <span>
                         Código de Referencia:{' '}
-                        <strong className="text-white">{product.code}</strong>
+                        <strong className="text-[#F39200]">
+                          {product.code}
+                        </strong>
                       </span>
                     </div>
                   </div>
@@ -340,7 +346,7 @@ export default function ProductCatalog() {
                     <button
                       type="button"
                       onClick={() => handleCustomizeProduct(product)}
-                      className="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-300 border border-cyan-400/30 text-xs font-bold transition"
+                      className="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-[#E5007D]/20 hover:bg-[#E5007D] text-[#ff66b5] hover:text-white border border-[#E5007D]/40 text-xs font-extrabold transition"
                     >
                       <Sparkles className="w-3.5 h-3.5" />
                       Personalizar
@@ -348,9 +354,9 @@ export default function ProductCatalog() {
                     <button
                       type="button"
                       onClick={() => handleQuickAddToOrder(product)}
-                      className="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-semibold transition"
+                      className="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-[#009FE3]/20 hover:bg-[#009FE3] text-[#00AEEF] hover:text-white border border-[#009FE3]/40 text-xs font-extrabold transition"
                     >
-                      <PlusCircle className="w-3.5 h-3.5 text-cyan-400" />
+                      <PlusCircle className="w-3.5 h-3.5" />
                       Sumar al Pedido
                     </button>
                   </div>
@@ -359,7 +365,7 @@ export default function ProductCatalog() {
                     href={directWaUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 text-xs font-bold transition"
+                    className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-[#8CC63F]/20 hover:bg-[#8CC63F] text-[#a8e05f] hover:text-[#0B0D13] border border-[#8CC63F]/40 text-xs font-extrabold transition"
                   >
                     <MessageCircle className="w-3.5 h-3.5" />
                     Pedir Directo por WhatsApp ({product.code})
@@ -379,29 +385,29 @@ export default function ProductCatalog() {
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="max-w-2xl w-full rounded-3xl bg-zinc-950 border border-white/15 p-6 space-y-4 shadow-2xl"
+            className="max-w-2xl w-full rounded-3xl bg-[#11141E] border-2 border-[#00AEEF]/50 p-6 space-y-4 shadow-2xl"
           >
             <div className="flex items-center justify-between">
               <div>
-                <span className="text-xs font-bold uppercase tracking-wider text-cyan-400">
+                <span className="text-xs font-black uppercase tracking-wider text-[#F39200]">
                   Lámina Oficial de Referencia • {lightboxProduct.series} (
                   {lightboxProduct.code})
                 </span>
-                <h3 className="text-xl font-extrabold text-white">
+                <h3 className="text-xl font-black text-white">
                   {lightboxProduct.name}
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setLightboxProduct(null)}
-                className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300"
+                className="p-2 rounded-xl bg-white/5 hover:bg-[#E5007D] text-slate-300 hover:text-white transition"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {lightboxProduct.imageUrl && (
-              <div className="rounded-2xl bg-white p-6 flex items-center justify-center max-h-[60vh] overflow-hidden">
+              <div className="rounded-2xl bg-white p-6 flex items-center justify-center max-h-[60vh] overflow-hidden border-2 border-[#00AEEF]/30">
                 <img
                   src={lightboxProduct.imageUrl}
                   alt={lightboxProduct.name}
@@ -418,7 +424,7 @@ export default function ProductCatalog() {
                   setLightboxProduct(null);
                   handleCustomizeProduct(prod);
                 }}
-                className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-cyan-400 to-blue-600 text-zinc-950 font-extrabold text-xs sm:text-sm shadow-laser-neon"
+                className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-[#E5007D] via-[#F39200] to-[#009FE3] text-white font-black text-xs sm:text-sm shadow-laser-neon"
               >
                 <Sparkles className="w-4 h-4" />
                 Personalizar este Diseño en el Estudio Láser
