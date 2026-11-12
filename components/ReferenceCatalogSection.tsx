@@ -6,12 +6,12 @@ import {
   Sparkles,
   CheckCircle2,
   RefreshCw,
-  MessageCircle,
+  ClipboardList,
 } from 'lucide-react';
 import { ANODIZED_COLORS, PRESET_DESIGNS } from '@/utils/catalogData';
 import { useCustomizerStore } from '@/hooks/useCustomizerStore';
 import { PresetDesign } from '@/types';
-import { buildSingleOrderWhatsAppUrl } from '@/utils/whatsapp';
+import { BOX_DIMENSIONS_STR } from '@/utils/brand';
 
 const REFERENCE_FOLDERS = [
   {
@@ -87,6 +87,8 @@ export default function ReferenceCatalogSection() {
     extraDiscoveredDesigns,
     isSyncingCatalog,
     syncCatalogFromDisk,
+    addToOrderList,
+    setOrderDrawerOpen,
   } = useCustomizerStore();
 
   useEffect(() => {
@@ -146,8 +148,9 @@ export default function ReferenceCatalogSection() {
               <code className="text-[#00AEEF] bg-white/5 px-1.5 py-0.5 rounded font-semibold">
                 Catalogo/
               </code>{' '}
-              para explorar las láminas de grabado láser o sincronizar nuevos
-              archivos al instante.
+              para explorar las láminas de grabado láser. Freseros de aluminio
+              esterilizable para{' '}
+              <strong className="text-white">alta velocidad</strong> ({BOX_DIMENSIONS_STR}).
             </p>
           </div>
 
@@ -204,12 +207,6 @@ export default function ReferenceCatalogSection() {
             const recColor =
               ANODIZED_COLORS.find((c) => c.id === design.recommendedColorId) ||
               ANODIZED_COLORS[0];
-            const waUrl = buildSingleOrderWhatsAppUrl({
-              color: recColor,
-              designMode: 'preset',
-              presetDesign: design,
-              customText: '',
-            });
 
             return (
               <div
@@ -267,15 +264,26 @@ export default function ReferenceCatalogSection() {
                     <Sparkles className="w-3 h-3" />
                     Simular
                   </button>
-                  <a
-                    href={waUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <button
+                    type="button"
+                    onClick={() => {
+                      addToOrderList({
+                        title: design.title,
+                        code: design.code,
+                        series: design.category,
+                        color: recColor,
+                        designMode: 'preset',
+                        presetDesign: design,
+                        customText: `CATÁLOGO ${design.code}`,
+                        previewDataUrl: design.imageUrl || '',
+                      });
+                      setOrderDrawerOpen(true);
+                    }}
                     className="py-1.5 px-2 rounded-lg bg-[#8CC63F]/20 hover:bg-[#8CC63F] text-[#a8e05f] hover:text-[#0B0D13] border border-[#8CC63F]/35 font-extrabold text-[10px] flex items-center justify-center gap-1 transition"
                   >
-                    <MessageCircle className="w-3 h-3" />
+                    <ClipboardList className="w-3 h-3" />
                     Pedir
-                  </a>
+                  </button>
                 </div>
               </div>
             );

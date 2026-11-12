@@ -315,7 +315,11 @@ export default function LaserCanvasPreview() {
     ctx.fillStyle = 'rgba(255, 255, 255, 0.58)';
     ctx.font = '600 9px monospace';
     ctx.textAlign = 'left';
-    ctx.fillText('CREATIVE TOOLS • ALUMINIO GRADO MÉDICO', boxX + 26, boxY + 25);
+    ctx.fillText(
+      'CREATIVE TOOLS • ALTA VELOCIDAD (7.3×2.8×2.5cm)',
+      boxX + 26,
+      boxY + 25
+    );
     ctx.textAlign = 'right';
     ctx.fillText('AUTOCLAVABLE 134°C', boxX + boxW - 26, boxY + 25);
     ctx.restore();

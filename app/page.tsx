@@ -5,12 +5,15 @@ import ProductCatalog from '@/components/ProductCatalog';
 import ReferenceCatalogSection from '@/components/ReferenceCatalogSection';
 import LaserCustomizerStudio from '@/components/LaserCustomizerStudio';
 import CartDrawer from '@/components/CartDrawer';
-import { ShieldCheck, MessageCircle, Globe, Instagram } from 'lucide-react';
+import { ShieldCheck, Truck, Instagram, Ruler, Zap } from 'lucide-react';
+import CreativeToolsLogo, {
+  CreativeMolarIcon,
+} from '@/components/CreativeBrandLogo';
 import {
-  WHATSAPP_DISPLAY_NUMBER,
-  WHATSAPP_ORDER_NUMBER,
-} from '@/utils/whatsapp';
-import { CreativeMolarIcon } from '@/components/CreativeBrandLogo';
+  OFFICIAL_INSTAGRAM_URL,
+  OFFICIAL_INSTAGRAM_HANDLE,
+  BOX_DIMENSIONS_STR,
+} from '@/utils/brand';
 
 export default function HomePage() {
   return (
@@ -26,68 +29,63 @@ export default function HomePage() {
 
       <CartDrawer />
 
-      {/* Floating WhatsApp Direct Order Button */}
+      {/* Floating Official Instagram Support Pill */}
       <a
-        href={`https://wa.me/${WHATSAPP_ORDER_NUMBER}?text=${encodeURIComponent(
-          'Hola Creative Tools, quiero realizar un pedido de fresero personalizado.'
-        )}`}
+        href={OFFICIAL_INSTAGRAM_URL}
         target="_blank"
         rel="noopener noreferrer"
-        className="fixed bottom-6 right-6 z-40 inline-flex items-center gap-2.5 px-4 py-3.5 rounded-2xl bg-gradient-to-r from-[#8CC63F] to-[#009FE3] text-[#0B0D13] font-black text-xs sm:text-sm shadow-2xl hover:scale-105 transition-transform"
+        aria-label="Perfil Oficial de Instagram"
+        className="fixed bottom-6 right-6 z-40 inline-flex items-center gap-2.5 px-4 py-3 rounded-2xl bg-gradient-to-r from-[#E5007D] via-[#F39200] to-[#009FE3] text-white font-extrabold text-xs sm:text-sm shadow-laser-neon hover:scale-105 active:scale-95 transition-all"
       >
-        <MessageCircle className="w-5 h-5 fill-[#0B0D13]" />
-        <span>Pedidos: {WHATSAPP_DISPLAY_NUMBER}</span>
+        <Instagram className="w-5 h-5 text-white" />
+        <span className="drop-shadow">{OFFICIAL_INSTAGRAM_HANDLE}</span>
       </a>
 
-      {/* Footer matching Official Creative Tools Packaging */}
+      {/* Footer matching Official Creative Tools Packaging & Logistics */}
       <footer className="border-t border-white/10 bg-[#0B0D13]">
         <div className="h-1.5 w-full creative-border-top" />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex flex-col lg:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-3.5">
-            <div className="w-11 h-11 rounded-2xl bg-[#11141E] border border-white/15 flex items-center justify-center">
-              <CreativeMolarIcon className="w-7 h-7" />
-            </div>
-            <div>
-              <div className="flex items-baseline gap-2">
-                <span className="text-base font-black tracking-wider text-white">
-                  CREATIVE
-                </span>
-                <span className="text-xs font-light tracking-[0.28em] text-slate-300 uppercase">
-                  TOOLS
-                </span>
-                <span className="text-xs font-bold text-[#F39200] ml-1">
-                  • CUSTOM DESIGN SERIES
-                </span>
-              </div>
-              <p className="text-xs text-slate-400">
-                Herramientas que Inspiran Precisión • Freseros y Fresas Dentales
-                de Alta Precisión
-              </p>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-8">
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
+            <CreativeToolsLogo size="md" showTagline={true} />
+
+            {/* Logistics & Product Specs Badges */}
+            <div className="flex flex-wrap items-center justify-center gap-4 text-xs text-slate-300 font-semibold">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10">
+                <Zap className="w-4 h-4 text-[#F39200]" />
+                Solo Fresas de Alta Velocidad
+              </span>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10">
+                <Ruler className="w-4 h-4 text-[#00AEEF]" />
+                Medidas: {BOX_DIMENSIONS_STR}
+              </span>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10">
+                <Truck className="w-4 h-4 text-[#8CC63F]" />
+                FedEx $150 MXN (GRATIS &gt; 2 pzs) • Chihuahua Local
+              </span>
+              <a
+                href={OFFICIAL_INSTAGRAM_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#E5007D]/15 border border-[#E5007D]/35 text-[#ff66b5] hover:text-white hover:bg-[#E5007D] transition font-bold"
+              >
+                <Instagram className="w-4 h-4" />
+                {OFFICIAL_INSTAGRAM_HANDLE}
+              </a>
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center justify-center gap-6 text-xs text-slate-300 font-semibold">
-            <span className="inline-flex items-center gap-1.5">
-              <Instagram className="w-4 h-4 text-[#E5007D]" />
-              @creativetools.mx
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              <Globe className="w-4 h-4 text-[#00AEEF]" />
-              www.creativetools.mx
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              <ShieldCheck className="w-4 h-4 text-[#8CC63F]" />
-              Garantía en Grabado Láser Autoclavable
-            </span>
-            <a
-              href={`https://wa.me/${WHATSAPP_ORDER_NUMBER}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-[#8CC63F] hover:underline font-extrabold"
-            >
-              <MessageCircle className="w-4 h-4" />
-              WhatsApp: {WHATSAPP_DISPLAY_NUMBER}
-            </a>
+          <div className="pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400">
+            <p>
+              © {new Date().getFullYear()} Creative Tools. Herramientas que
+              Inspiran Precisión. Todos los derechos reservados.
+            </p>
+            <div className="flex items-center gap-6">
+              <span className="inline-flex items-center gap-1.5 text-slate-300">
+                <ShieldCheck className="w-4 h-4 text-[#8CC63F]" />
+                Aluminio Grado Médico Autoclavable a 134°C
+              </span>
+            </div>
           </div>
         </div>
       </footer>

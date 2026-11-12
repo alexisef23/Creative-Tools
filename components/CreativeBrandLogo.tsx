@@ -43,6 +43,48 @@ export function CreativeMolarIcon({ className = 'w-9 h-9' }: CreativeMolarIconPr
   );
 }
 
+export function CreativeToolsLogo({
+  size = 'md',
+  showTagline = true,
+  className = '',
+}: {
+  size?: 'sm' | 'md' | 'lg';
+  showTagline?: boolean;
+  className?: string;
+}) {
+  const box = { sm: 'w-9 h-9 rounded-xl', md: 'w-12 h-12 rounded-2xl', lg: 'w-16 h-16 rounded-2xl' }[size];
+  const icon = { sm: 'w-6 h-6', md: 'w-8 h-8', lg: 'w-11 h-11' }[size];
+  const word = { sm: 'text-base', md: 'text-xl', lg: 'text-2xl' }[size];
+  const sub = { sm: 'text-[10px]', md: 'text-sm', lg: 'text-base' }[size];
+
+  return (
+    <div className={`flex items-center gap-3 ${className}`}>
+      <div
+        className={`${box} bg-[#11141E] border border-white/15 flex items-center justify-center shadow-laser-neon shrink-0`}
+      >
+        <CreativeMolarIcon className={icon} />
+      </div>
+      <div className="leading-tight">
+        <div className="flex items-baseline gap-2">
+          <span className={`font-black tracking-wider text-white ${word}`}>
+            CREATIVE
+          </span>
+          <span
+            className={`font-light tracking-[0.32em] text-slate-200 uppercase ${sub}`}
+          >
+            TOOLS
+          </span>
+        </div>
+        {showTagline && (
+          <p className="text-[10px] font-bold tracking-widest uppercase text-[#00AEEF]">
+            Herramientas que Inspiran Precisión
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export function CreativeDiagonalRibbons({
   position = 'top-right',
   className = '',
@@ -68,3 +110,7 @@ export function CreativeDiagonalRibbons({
     </div>
   );
 }
+
+export default CreativeToolsLogo;
+
+

@@ -1,16 +1,17 @@
 'use client';
 
 import React from 'react';
-import { Sparkles, ClipboardList, MessageCircle } from 'lucide-react';
+import { Sparkles, ClipboardList, Instagram } from 'lucide-react';
 import { useCustomizerStore } from '@/hooks/useCustomizerStore';
 import {
-  WHATSAPP_DISPLAY_NUMBER,
-  WHATSAPP_ORDER_NUMBER,
-} from '@/utils/whatsapp';
+  OFFICIAL_INSTAGRAM_URL,
+  OFFICIAL_INSTAGRAM_HANDLE,
+} from '@/utils/brand';
 import { CreativeMolarIcon } from './CreativeBrandLogo';
 
 export default function Navbar() {
   const { orderList, setOrderDrawerOpen } = useCustomizerStore();
+  const totalPieces = orderList.reduce((acc, i) => acc + (i.quantity || 1), 0);
 
   return (
     <header className="sticky top-0 z-40 w-full backdrop-blur-xl bg-[#0B0D13]/90 border-b border-white/10">
@@ -46,7 +47,7 @@ export default function Navbar() {
                 Custom <span className="text-[#F39200] mx-1">Design</span> Series
               </span>
               <p className="text-[11px] text-slate-400 mt-0.5">
-                Pedidos: {WHATSAPP_DISPLAY_NUMBER}
+                Alta Velocidad · 7.3 × 2.8 × 2.5 cm
               </p>
             </div>
           </div>
@@ -78,15 +79,14 @@ export default function Navbar() {
         {/* Actions */}
         <div className="flex items-center gap-2.5">
           <a
-            href={`https://wa.me/${WHATSAPP_ORDER_NUMBER}?text=${encodeURIComponent(
-              'Hola Creative Tools, me gustaría hacer un pedido de un fresero personalizado.'
-            )}`}
+            href={OFFICIAL_INSTAGRAM_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="hidden sm:inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold bg-[#8CC63F]/15 hover:bg-[#8CC63F]/25 text-[#a8e05f] border border-[#8CC63F]/35 transition"
+            aria-label="Perfil Oficial de Instagram"
+            className="hidden sm:inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold bg-gradient-to-r from-[#E5007D]/15 via-[#F39200]/15 to-[#00AEEF]/15 hover:from-[#E5007D]/25 hover:via-[#F39200]/25 hover:to-[#00AEEF]/25 text-white border border-white/15 transition shadow-sm"
           >
-            <MessageCircle className="w-4 h-4 text-[#8CC63F]" />
-            {WHATSAPP_DISPLAY_NUMBER}
+            <Instagram className="w-4 h-4 text-[#E5007D]" />
+            <span>{OFFICIAL_INSTAGRAM_HANDLE}</span>
           </a>
 
           <button
@@ -97,9 +97,9 @@ export default function Navbar() {
             <span className="inline-flex items-center gap-2 px-3.5 py-2 rounded-[10px] bg-[#0B0D13] text-white font-extrabold text-xs sm:text-sm">
               <ClipboardList className="w-4 h-4 text-[#00AEEF]" />
               <span className="hidden sm:inline">Mi Pedido</span>
-              {orderList.length > 0 && (
+              {totalPieces > 0 && (
                 <span className="px-2 py-0.5 text-xs rounded-full bg-[#E5007D] text-white font-black">
-                  {orderList.length}
+                  {totalPieces}
                 </span>
               )}
             </span>

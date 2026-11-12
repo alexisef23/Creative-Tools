@@ -5,7 +5,6 @@ import {
   Palette,
   Upload,
   Sparkles,
-  MessageCircle,
   CheckCircle2,
   Type,
   Sliders,
@@ -15,6 +14,11 @@ import {
   Info,
   RefreshCw,
   Award,
+  Instagram,
+  ClipboardList,
+  Truck,
+  Plus,
+  Minus,
 } from 'lucide-react';
 import {
   ANODIZED_COLORS,
@@ -23,13 +27,14 @@ import {
 } from '@/utils/catalogData';
 import { useCustomizerStore } from '@/hooks/useCustomizerStore';
 import {
-  buildSingleOrderWhatsAppUrl,
-  sendOrderWithImageToWhatsApp,
-  WHATSAPP_DISPLAY_NUMBER,
-} from '@/utils/whatsapp';
+  OFFICIAL_INSTAGRAM_URL,
+  OFFICIAL_INSTAGRAM_HANDLE,
+  BOX_DIMENSIONS_STR,
+} from '@/utils/brand';
 import { LaserFontFamily, SeriesCategory } from '@/types';
 import LaserCanvasPreview from './LaserCanvasPreview';
 import { CreativeDiagonalRibbons } from './CreativeBrandLogo';
+import ProductSpecs from './ProductSpecs';
 
 const DENTAL_SPECIALTIES = [
   'ODONTOLOGÍA AVANZADA',
@@ -46,6 +51,7 @@ export default function LaserCustomizerStudio() {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [studioSeriesFilter, setStudioSeriesFilter] =
     useState<SeriesCategory>('Todos');
+  const [quantity, setQuantity] = useState<number>(1);
   const [doctorName, setDoctorName] = useState('');
   const [clinicName, setClinicName] = useState('');
   const [orderNotes, setOrderNotes] = useState('');
@@ -68,6 +74,7 @@ export default function LaserCustomizerStudio() {
     updateTransform,
     latestCanvasSnapshot,
     addToOrderList,
+    setOrderDrawerOpen,
   } = useCustomizerStore();
 
   const allStudioPresets = [...PRESET_DESIGNS, ...extraDiscoveredDesigns];
@@ -102,7 +109,7 @@ export default function LaserCustomizerStudio() {
     }
   };
 
-  const handleAddToOrderList = () => {
+  const handleAddToOrderList = (openDrawer = false) => {
     addToOrderList({
       title:
         designMode === 'preset'
@@ -118,45 +125,18 @@ export default function LaserCustomizerStudio() {
       customText: transform.customText,
       specialtyTag: transform.specialtyTag,
       previewDataUrl: latestCanvasSnapshot,
-    });
-  };
-
-  const handleDirectWhatsAppOrder = async () => {
-    const combinedText = transform.specialtyTag.trim()
-      ? `${transform.customText.trim()} (${transform.specialtyTag.trim()})`
-      : transform.customText.trim();
-
-    const whatsappUrl = buildSingleOrderWhatsAppUrl({
-      color: selectedColor,
-      designMode,
-      presetDesign: selectedPreset,
-      uploadedFileName,
-      customText: combinedText,
-      doctorName,
-      clinicName,
-      notes: orderNotes,
+      quantity: Math.max(1, quantity),
     });
 
-    const prefix =
-      designMode === 'preset'
-        ? `pedido-${selectedPreset.code.toLowerCase()}`
-        : 'pedido-logo-personalizado';
-
-    const result = await sendOrderWithImageToWhatsApp({
-      whatsappUrl,
-      canvasDataUrl: latestCanvasSnapshot,
-      sourceImageDataUrl: designMode === 'upload' ? uploadedImageSrc : null,
-      fileNamePrefix: prefix,
-    });
-
-    if (result.copiedToClipboard) {
-      setDispatchNotice(
-        `¡Listo! La imagen a grabar se copió a tu portapapeles y se descargó en tu equipo. En el chat de WhatsApp (${WHATSAPP_DISPLAY_NUMBER}) solo presiona Ctrl+V (Pegar) o adjunta la imagen descargada.`
-      );
+    if (openDrawer) {
+      setOrderDrawerOpen(true);
     } else {
       setDispatchNotice(
-        `¡Listo! Se descargó la imagen de tu diseño automáticamente y se abrió el chat con ${WHATSAPP_DISPLAY_NUMBER}. Adjunta la imagen descargada en la conversación.`
+        `¡Diseño agregado a tu pedido (${quantity} ${
+          quantity > 1 ? 'piezas' : 'pieza'
+        })! Abre "Mi Pedido" cuando estés listo para ingresar tus datos de envío.`
       );
+      setTimeout(() => setDispatchNotice(null), 4500);
     }
   };
 
@@ -185,15 +165,20 @@ export default function LaserCustomizerStudio() {
             <span className="text-[#8CC63F]">Imagen a Grabar</span>
           </h2>
           <p className="text-slate-300 text-sm sm:text-base mt-2">
-            Elige el color del aluminio anodizado, selecciona cualquiera de{' '}
-            <span className="text-[#00AEEF] font-bold">
-              nuestros diseños del catálogo
-            </span>{' '}
-            o sube tu propia imagen/logo. Al terminar, envía tu pedido junto con
-            la imagen a grabar directamente a nuestro WhatsApp{' '}
-            <span className="text-[#8CC63F] font-extrabold">
-              {WHATSAPP_DISPLAY_NUMBER}
-            </span>
+            Freseros de aluminio grado médico esterilizable para{' '}
+            <strong className="text-white">alta velocidad exclusivamente</strong>{' '}
+            ({BOX_DIMENSIONS_STR}). Elige tu color anodizado, selecciona un
+            diseño del catálogo o sube tu logo personalizado. Contacto y dudas
+            oficiales en{' '}
+            <a
+              href={OFFICIAL_INSTAGRAM_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[#E5007D] hover:underline font-extrabold inline-flex items-center gap-1"
+            >
+              <Instagram className="w-4 h-4 inline" />
+              {OFFICIAL_INSTAGRAM_HANDLE}
+            </a>
             .
           </p>
         </div>
@@ -522,45 +507,89 @@ export default function LaserCustomizerStudio() {
               </div>
             </div>
 
-            {/* STEP 3: Realizar Pedido Directo por WhatsApp (+52 1 614 552 5335) */}
+            {/* STEP 3: Configuración y Envío de Pedido */}
             <div className="p-6 rounded-2xl bg-[#11141E] border border-[#8CC63F]/40 space-y-4 shadow-lg">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-black uppercase tracking-wider text-[#8CC63F] flex items-center gap-1.5">
                   <UserCheck className="w-4 h-4" />
-                  Paso 3 • Datos para Enviar Pedido
+                  Paso 3 • Resumen y Envío de Pedido
                 </span>
-                <span className="text-[11px] font-mono text-[#a8e05f] font-bold">
-                  {WHATSAPP_DISPLAY_NUMBER}
+                <span className="text-[11px] font-bold text-[#00AEEF] bg-[#00AEEF]/10 px-2 py-0.5 rounded-full border border-[#00AEEF]/30">
+                  Alta Velocidad
                 </span>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                <input
-                  type="text"
-                  value={doctorName}
-                  onChange={(e) => setDoctorName(e.target.value)}
-                  placeholder="Tu Nombre / Doctor(a) (Opcional)"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-[#0B0D13] border border-white/15 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-[#8CC63F]"
-                />
-                <input
-                  type="text"
-                  value={clinicName}
-                  onChange={(e) => setClinicName(e.target.value)}
-                  placeholder="Clínica / Ciudad (Opcional)"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-[#0B0D13] border border-white/15 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-[#8CC63F]"
-                />
+              {/* Shipping Policy Banner */}
+              <div className="p-3 rounded-xl bg-gradient-to-r from-[#009FE3]/15 via-[#8CC63F]/15 to-[#0B0D13] border border-[#009FE3]/30 flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-[#009FE3]/20 border border-[#009FE3] flex items-center justify-center shrink-0">
+                  <Truck className="w-4 h-4 text-[#00AEEF]" />
+                </div>
+                <div className="text-xs">
+                  <p className="font-extrabold text-white">
+                    Envío Nacional FedEx: $150 MXN
+                  </p>
+                  <p className="text-[#a8e05f] font-semibold text-[11px]">
+                    ¡GRATIS en compras de más de 2 piezas (&gt; 2 pzs)!
+                  </p>
+                </div>
               </div>
 
-              <input
-                type="text"
-                value={orderNotes}
-                onChange={(e) => setOrderNotes(e.target.value)}
-                placeholder="Indicaciones especiales sobre tu grabado (Opcional)..."
-                className="w-full px-3.5 py-2.5 rounded-xl bg-[#0B0D13] border border-white/15 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-[#8CC63F]"
-              />
+              {/* Quantity Selector */}
+              <div className="flex items-center justify-between p-3.5 rounded-xl bg-[#0B0D13] border border-white/10">
+                <div>
+                  <p className="text-xs font-extrabold text-white">
+                    Cantidad de freseros:
+                  </p>
+                  <p className="text-[11px] text-slate-400">
+                    {quantity > 2 ? (
+                      <span className="text-[#8CC63F] font-bold">
+                        ✓ Califica para Envío FedEx GRATIS
+                      </span>
+                    ) : (
+                      <span>
+                        Faltan {3 - quantity} pieza(s) para envío gratis
+                      </span>
+                    )}
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                    className="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center font-bold transition"
+                    title="Disminuir cantidad"
+                  >
+                    <Minus className="w-3.5 h-3.5" />
+                  </button>
+                  <span className="w-8 text-center text-sm font-black text-white">
+                    {quantity}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setQuantity((q) => q + 1)}
+                    className="w-8 h-8 rounded-lg bg-[#009FE3]/20 hover:bg-[#009FE3] text-white flex items-center justify-center font-bold transition"
+                    title="Aumentar cantidad"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
 
               {/* Live Configuration Summary Box */}
               <div className="p-3.5 rounded-xl bg-[#0B0D13] border border-white/10 text-xs space-y-1.5 text-slate-300">
+                <div className="flex justify-between">
+                  <span className="text-slate-400">Dimensiones:</span>
+                  <span className="font-bold text-white font-mono">
+                    {BOX_DIMENSIONS_STR}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-400">Compatibilidad:</span>
+                  <span className="font-bold text-[#F39200]">
+                    Fresas de Alta Velocidad
+                  </span>
+                </div>
                 <div className="flex justify-between">
                   <span className="text-slate-400">Color del Fresero:</span>
                   <span className="font-bold text-white">
@@ -568,42 +597,49 @@ export default function LaserCustomizerStudio() {
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-400">Imagen a Grabar:</span>
+                  <span className="text-slate-400">Diseño Láser:</span>
                   <span className="font-bold text-[#00AEEF]">
                     {designMode === 'preset'
                       ? `${selectedPreset.code} • ${selectedPreset.title}`
-                      : uploadedFileName || 'Imagen / Logo Personalizado'}
+                      : uploadedFileName || 'Logo Propio Personalizado'}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-400">Atención Directa:</span>
-                  <span className="font-bold text-[#8CC63F]">
-                    WhatsApp {WHATSAPP_DISPLAY_NUMBER}
-                  </span>
+                  <span className="text-slate-400">Atención y Soporte:</span>
+                  <a
+                    href={OFFICIAL_INSTAGRAM_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-bold text-[#E5007D] hover:underline inline-flex items-center gap-1"
+                  >
+                    <Instagram className="w-3.5 h-3.5" />
+                    {OFFICIAL_INSTAGRAM_HANDLE}
+                  </a>
                 </div>
               </div>
 
-              {/* Primary CTA: Send Order + Image to WhatsApp +52 1 614 552 5335 */}
+              {/* Primary CTA: Add and Open Checkout */}
               <button
                 type="button"
-                onClick={handleDirectWhatsAppOrder}
-                className="w-full inline-flex items-center justify-center gap-2.5 py-4 px-5 rounded-xl bg-gradient-to-r from-[#8CC63F] via-[#76B82A] to-[#009FE3] text-[#0B0D13] font-black text-xs sm:text-sm shadow-lime-neon hover:brightness-110 transition"
+                onClick={() => handleAddToOrderList(true)}
+                className="w-full inline-flex items-center justify-center gap-2.5 py-4 px-5 rounded-xl bg-gradient-to-r from-[#E5007D] via-[#F39200] to-[#009FE3] text-white font-black text-xs sm:text-sm shadow-laser-neon hover:brightness-110 active:scale-[0.99] transition"
               >
-                <MessageCircle className="w-5 h-5 fill-[#0B0D13]" />
-                Hacer Pedido + Enviar Imagen al {WHATSAPP_DISPLAY_NUMBER}
+                <ClipboardList className="w-5 h-5" />
+                Hacer Pedido de este Fresero ({quantity}{' '}
+                {quantity > 1 ? 'piezas' : 'pieza'})
               </button>
 
-              {/* Secondary CTA: Add to Order List if ordering multiple designs */}
+              {/* Secondary CTA: Add to Order List */}
               <button
                 type="button"
-                onClick={handleAddToOrderList}
-                className="w-full inline-flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-[#E5007D]/15 hover:bg-[#E5007D]/25 text-[#ff66b5] border border-[#E5007D]/40 font-extrabold text-xs transition"
+                onClick={() => handleAddToOrderList(false)}
+                className="w-full inline-flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-white/5 hover:bg-white/10 text-slate-200 border border-white/15 font-bold text-xs transition"
               >
-                <PlusCircle className="w-4 h-4" />
-                Agregar este Diseño a Mi Lista de Pedido (Varios Modelos)
+                <PlusCircle className="w-4 h-4 text-[#00AEEF]" />
+                Guardar en Mi Pedido y Diseñar Otro Modelo
               </button>
 
-              {/* Helpful Notice when image is copied & downloaded */}
+              {/* Helpful Notice when item is saved */}
               {dispatchNotice && (
                 <div className="p-3.5 rounded-xl bg-[#8CC63F]/15 border border-[#8CC63F]/40 text-[#a8e05f] text-xs flex items-start gap-2.5 leading-relaxed">
                   <Info className="w-4 h-4 text-[#8CC63F] shrink-0 mt-0.5" />

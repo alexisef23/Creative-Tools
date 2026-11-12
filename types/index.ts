@@ -76,13 +76,18 @@ export interface OrderItem {
   customText?: string;
   specialtyTag?: string;
   previewDataUrl: string;
+  quantity: number; // Número de piezas (freseros) de este diseño
 }
 
+export type DeliveryMethod = 'fedex' | 'local';
+
+/** Los 5 campos obligatorios del checkout + método de entrega y notas opcionales. */
 export interface OrderCustomerDetails {
-  doctorName: string;
-  clinicName: string;
-  phone: string;
-  city: string;
-  address: string;
+  fullName: string; // 1. Nombre completo
+  street: string; // 2. Calle y número
+  neighborhood: string; // 3. Colonia
+  postalCode: string; // 4. Código postal
+  phone: string; // 5. Teléfono de contacto
+  deliveryMethod: DeliveryMethod;
   notes: string;
 }

@@ -1,147 +1,118 @@
-import {
-  AnodizedColor,
-  OrderCustomerDetails,
-  OrderItem,
-  PresetDesign,
-} from '@/types';
+import { OrderCustomerDetails, OrderItem } from '@/types';
+import { BOX_DIMENSIONS_LABEL, INSTAGRAM_HANDLE } from './brand';
+import { calculateShipping, formatMxn, LOCAL_CITY_LABEL } from './shipping';
 
-// Número oficial de pedidos por WhatsApp: +52 1 614 552 5335
+// Canal interno de recepción de pedidos (no se muestra en la interfaz).
+// El contacto público para dudas y cotizaciones es Instagram (ver utils/brand.ts).
 export const WHATSAPP_ORDER_NUMBER = '5216145525335';
-export const WHATSAPP_DISPLAY_NUMBER = '+52 1 614 552 5335';
 
-export function buildSingleOrderMessageText(params: {
-  color: AnodizedColor;
-  designMode: 'preset' | 'upload';
-  presetDesign: PresetDesign;
-  uploadedFileName?: string | null;
-  customText: string;
-  doctorName?: string;
-  clinicName?: string;
-  notes?: string;
-}): string {
-  const {
-    color,
-    designMode,
-    presetDesign,
-    uploadedFileName,
-    customText,
-    doctorName,
-    clinicName,
-    notes,
-  } = params;
-
-  const designSummary =
-    designMode === 'preset'
-      ? `Catálogo Oficial: ${presetDesign.title} (Código: ${presetDesign.code} • Serie ${presetDesign.category})`
-      : `Imagen / Logo Personalizado (${uploadedFileName || 'Archivo propio subido'})`;
-
-  const lines = [
-    '🦷 *NUEVO PEDIDO DE FRESERO GRABADO LÁSER - CREATIVE TOOLS*',
-    '',
-    '📋 *ESPECIFICACIONES DEL DISEÑO:*',
-    `• *Color del Fresero (Aluminio Anodizado):* ${color.name}`,
-    `• *Diseño a Grabar:* ${designSummary}`,
-    customText.trim()
-      ? `• *Texto Personalizado en Tapa:* "${customText.trim()}"`
-      : '• *Texto Personalizado:* Sin texto adicional',
-    `• *Material:* Aluminio Grado Médico 6061-T6 (Autoclavable 134°C)`,
-    doctorName?.trim() ? `• *Doctor(a):* ${doctorName.trim()}` : '',
-    clinicName?.trim() ? `• *Clínica / Consultorio:* ${clinicName.trim()}` : '',
-    notes?.trim() ? `• *Indicaciones adicionales:* ${notes.trim()}` : '',
-    '',
-    '🖼️ *IMAGEN A GRABAR Y MOCKUP:*',
-    '_(Te adjunto a continuación en este chat la imagen del diseño y la vista previa del fresero grabado)_',
-  ].filter(Boolean);
-
-  return lines.join('\n');
-}
-
-export function buildSingleOrderWhatsAppUrl(params: {
-  color: AnodizedColor;
-  designMode: 'preset' | 'upload';
-  presetDesign: PresetDesign;
-  uploadedFileName?: string | null;
-  customText: string;
-  doctorName?: string;
-  clinicName?: string;
-  notes?: string;
-}): string {
-  const text = buildSingleOrderMessageText(params);
-  return `https://wa.me/${WHATSAPP_ORDER_NUMBER}?text=${encodeURIComponent(text)}`;
-}
-
-export function buildOrderListWhatsAppUrl(
+export function buildOrderMessageText(
   items: OrderItem[],
   customer: OrderCustomerDetails
 ): string {
+  const shipping = calculateShipping(items, customer.deliveryMethod);
+
   const itemLines = items.map((item, index) => {
     const designDesc =
       item.designMode === 'preset'
         ? `${item.title} (Código: ${item.code})`
         : `Logo Propio (${item.uploadedFileName || 'Imagen personalizada'})`;
-    return `${index + 1}. *${designDesc}*\n   • Color Fresero: ${item.color.name}${
-      item.customText ? `\n   • Texto en tapa: "${item.customText}"` : ''
-    }`;
+    return [
+      `${index + 1}. *${designDesc}*`,
+      `   • Piezas: ${item.quantity}`,
+      `   • Color Fresero: ${item.color.name}`,
+      item.customText ? `   • Texto en tapa: "${item.customText}"` : '',
+    ]
+      .filter(Boolean)
+      .join('\n');
   });
 
+  const deliveryLine =
+    customer.deliveryMethod === 'local'
+      ? `• *Entrega:* Local dentro del ${LOCAL_CITY_LABEL} (por acordar)`
+      : `• *Entrega:* Envío nacional FedEx`;
+
   const lines = [
-    '🚀 *SOLICITUD DE PEDIDO DE FRESEROS PERSONALIZADOS - CREATIVE TOOLS*',
+    '🦷 *NUEVO PEDIDO DE FRESEROS GRABADOS LÁSER - CREATIVE TOOLS*',
     '',
     '*DISEÑOS SOLICITADOS:*',
     ...itemLines,
     '',
-    '*DATOS DEL DOCTOR / CLÍNICA PARA EL PEDIDO:*',
-    `• *Dr(a).:* ${customer.doctorName || 'Por confirmar'}`,
-    customer.clinicName ? `• *Clínica / Consultorio:* ${customer.clinicName}` : '',
-    `• *Teléfono / WhatsApp:* ${customer.phone || 'Por confirmar'}`,
-    customer.city ? `• *Ciudad / Estado:* ${customer.city}` : '',
-    customer.address ? `• *Dirección de Entrega:* ${customer.address}` : '',
-    customer.notes ? `• *Notas del Pedido:* ${customer.notes}` : '',
+    '*ESPECIFICACIONES:*',
+    `• Freseros para fresas de *alta velocidad*`,
+    `• Medidas: ${BOX_DIMENSIONS_LABEL} (largo × alto × ancho)`,
+    '• Aluminio grado médico anodizado, autoclavable 134 °C',
+    '',
+    '*DATOS DE ENVÍO:*',
+    `• *Nombre completo:* ${customer.fullName}`,
+    `• *Calle y número:* ${customer.street}`,
+    `• *Colonia:* ${customer.neighborhood}`,
+    `• *Código postal:* ${customer.postalCode}`,
+    `• *Teléfono de contacto:* ${customer.phone}`,
+    deliveryLine,
+    customer.notes.trim() ? `• *Notas:* ${customer.notes.trim()}` : '',
+    '',
+    '*RESUMEN:*',
+    `• Total de piezas: ${shipping.totalPieces}`,
+    customer.deliveryMethod === 'local'
+      ? '• Costo de envío: Por acordar (entrega local)'
+      : `• Costo de envío FedEx: ${
+          shipping.isFree ? 'GRATIS (más de 2 piezas)' : formatMxn(shipping.costMxn)
+        }`,
     '',
     '🖼️ *IMÁGENES A GRABAR:*',
-    '_(Adjunto en este chat la imagen generada del fresero y el arte a grabar)_',
-  ].filter(Boolean);
+    '_(Adjunto en este chat la vista previa del fresero y el arte a grabar)_',
+    '',
+    `Contacto Instagram: ${INSTAGRAM_HANDLE}`,
+  ].filter((l) => l !== '');
 
+  return lines.join('\n');
+}
+
+export function buildOrderWhatsAppUrl(
+  items: OrderItem[],
+  customer: OrderCustomerDetails
+): string {
   return `https://wa.me/${WHATSAPP_ORDER_NUMBER}?text=${encodeURIComponent(
-    lines.join('\n')
+    buildOrderMessageText(items, customer)
   )}`;
 }
 
+export const buildOrderListWhatsAppUrl = buildOrderWhatsAppUrl;
+
 /**
- * Prepares and dispatches the image to engrave + canvas mockup so the user can send it
- * directly to +52 1 614 552 5335 on WhatsApp:
- * 1. Copies the PNG image to the system clipboard (so the user can press Ctrl+V directly in WhatsApp)
- * 2. Downloads the PNG file automatically so they also have it saved on their device
- * 3. Opens the WhatsApp chat with +52 1 614 552 5335
+ * Prepara la imagen a grabar para enviarla junto con el pedido:
+ * 1. Copia el PNG al portapapeles (Ctrl+V en el chat)
+ * 2. Descarga el PNG (y la imagen original si es logo propio)
+ * 3. Abre el chat de pedidos con el mensaje prellenado
  */
-export async function sendOrderWithImageToWhatsApp(params: {
-  whatsappUrl: string;
+export async function sendOrderWithImage(params: {
+  orderUrl?: string;
+  whatsappUrl?: string;
   canvasDataUrl: string;
   sourceImageDataUrl?: string | null;
   fileNamePrefix: string;
 }): Promise<{ copiedToClipboard: boolean; downloaded: boolean }> {
-  const { whatsappUrl, canvasDataUrl, sourceImageDataUrl, fileNamePrefix } =
-    params;
+  const targetUrl = params.orderUrl || params.whatsappUrl || '';
+  const { canvasDataUrl, sourceImageDataUrl, fileNamePrefix } = params;
 
   let copiedToClipboard = false;
   let downloaded = false;
 
-  // 1. Copy the mockup PNG to the clipboard so Ctrl+V pastes the image directly into WhatsApp
   if (canvasDataUrl && typeof window !== 'undefined') {
     try {
       const response = await fetch(canvasDataUrl);
       const blob = await response.blob();
-
       if (navigator.clipboard && 'ClipboardItem' in window) {
-        const item = new ClipboardItem({ 'image/png': blob });
-        await navigator.clipboard.write([item]);
+        await navigator.clipboard.write([
+          new ClipboardItem({ [blob.type || 'image/png']: blob }),
+        ]);
         copiedToClipboard = true;
       }
     } catch {
       copiedToClipboard = false;
     }
 
-    // 2. Trigger automatic download of the mockup image (and custom uploaded image if present)
     try {
       const link = document.createElement('a');
       link.download = `${fileNamePrefix}-vista-previa.png`;
@@ -164,10 +135,12 @@ export async function sendOrderWithImageToWhatsApp(params: {
     }
   }
 
-  // 3. Open WhatsApp chat with +52 1 614 552 5335
-  if (typeof window !== 'undefined') {
-    window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+  if (typeof window !== 'undefined' && targetUrl) {
+    window.open(targetUrl, '_blank', 'noopener,noreferrer');
   }
 
   return { copiedToClipboard, downloaded };
 }
+
+export const sendOrderWithImageToWhatsApp = sendOrderWithImage;
+

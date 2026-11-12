@@ -9,8 +9,11 @@ import {
   Eye,
   X,
   BookOpen,
-  MessageCircle,
+  Instagram,
   PlusCircle,
+  Ruler,
+  Zap,
+  ClipboardList,
 } from 'lucide-react';
 import {
   ANODIZED_COLORS,
@@ -21,9 +24,11 @@ import {
 import { useCustomizerStore } from '@/hooks/useCustomizerStore';
 import { ProductItem } from '@/types';
 import {
-  buildSingleOrderWhatsAppUrl,
-  WHATSAPP_DISPLAY_NUMBER,
-} from '@/utils/whatsapp';
+  OFFICIAL_INSTAGRAM_URL,
+  OFFICIAL_INSTAGRAM_HANDLE,
+  BOX_DIMENSIONS_STR,
+  BUR_COMPATIBILITY_SHORT,
+} from '@/utils/brand';
 
 export default function ProductCatalog() {
   const {
@@ -32,6 +37,7 @@ export default function ProductCatalog() {
     extraDiscoveredDesigns,
     loadProductIntoStudio,
     addToOrderList,
+    setOrderDrawerOpen,
   } = useCustomizerStore();
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -118,12 +124,19 @@ export default function ProductCatalog() {
             <span className="text-[#8CC63F]">Personalizados</span>
           </h2>
           <p className="text-slate-300 text-sm sm:text-base mt-2 max-w-2xl">
-            Explora todos los diseños oficiales por serie. Puedes personalizar
-            el color del aluminio anodizado y tu nombre en el Estudio Láser o
-            solicitar tu pedido directamente por WhatsApp al{' '}
-            <span className="text-[#8CC63F] font-extrabold">
-              {WHATSAPP_DISPLAY_NUMBER}
-            </span>
+            Explora todos los diseños oficiales por serie. Fabricados en
+            aluminio grado médico esterilizable para fresas de{' '}
+            <strong className="text-white">alta velocidad</strong> ({BOX_DIMENSIONS_STR}
+            ). Personalízalos o haz tu pedido directo. Dudas y contacto oficial
+            en Instagram:{' '}
+            <a
+              href={OFFICIAL_INSTAGRAM_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[#00AEEF] hover:underline font-bold"
+            >
+              {OFFICIAL_INSTAGRAM_HANDLE}
+            </a>
             .
           </p>
         </div>
@@ -199,13 +212,6 @@ export default function ProductCatalog() {
           const preset =
             allPresets.find((p) => p.id === product.presetDesignId) ||
             PRESET_DESIGNS[0];
-
-          const directWaUrl = buildSingleOrderWhatsAppUrl({
-            color: boxColor,
-            designMode: 'preset',
-            presetDesign: preset,
-            customText: '',
-          });
 
           return (
             <article
@@ -321,17 +327,23 @@ export default function ProductCatalog() {
                   </p>
 
                   {/* Specs List */}
-                  <div className="mt-3.5 pt-3 border-t border-white/10 space-y-1 text-xs text-slate-300">
+                  <div className="mt-3.5 pt-3 border-t border-white/10 space-y-1.5 text-xs text-slate-300">
                     <div className="flex items-center gap-2">
-                      <Check className="w-3.5 h-3.5 text-[#8CC63F] shrink-0" />
-                      <span>
-                        Compatible con Piezas de Alta y Baja Velocidad
+                      <Zap className="w-3.5 h-3.5 text-[#F39200] shrink-0" />
+                      <span className="font-semibold text-white">
+                        Solo Fresas de Alta Velocidad
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Check className="w-3.5 h-3.5 text-[#00AEEF] shrink-0" />
+                      <Ruler className="w-3.5 h-3.5 text-[#00AEEF] shrink-0" />
                       <span>
-                        Código de Referencia:{' '}
+                        Medidas: <strong className="text-slate-200">{BOX_DIMENSIONS_STR}</strong>
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Check className="w-3.5 h-3.5 text-[#8CC63F] shrink-0" />
+                      <span>
+                        Ref:{' '}
                         <strong className="text-[#F39200]">
                           {product.code}
                         </strong>
@@ -361,15 +373,17 @@ export default function ProductCatalog() {
                     </button>
                   </div>
 
-                  <a
-                    href={directWaUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <button
+                    type="button"
+                    onClick={() => {
+                      handleQuickAddToOrder(product);
+                      setOrderDrawerOpen(true);
+                    }}
                     className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-[#8CC63F]/20 hover:bg-[#8CC63F] text-[#a8e05f] hover:text-[#0B0D13] border border-[#8CC63F]/40 text-xs font-extrabold transition"
                   >
-                    <MessageCircle className="w-3.5 h-3.5" />
-                    Pedir Directo por WhatsApp ({product.code})
-                  </a>
+                    <ClipboardList className="w-3.5 h-3.5" />
+                    Hacer Pedido de este Modelo ({product.code})
+                  </button>
                 </div>
               </div>
             </article>

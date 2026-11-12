@@ -8,15 +8,22 @@ import {
   ArrowRight,
   Layers,
   CheckCircle2,
-  MessageCircle,
+  Instagram,
   ChevronLeft,
   ChevronRight,
   Grid,
   Target,
+  Ruler,
+  Truck,
 } from 'lucide-react';
 import { ANODIZED_COLORS, PRESET_DESIGNS } from '@/utils/catalogData';
 import { useCustomizerStore } from '@/hooks/useCustomizerStore';
-import { WHATSAPP_DISPLAY_NUMBER } from '@/utils/whatsapp';
+import {
+  OFFICIAL_INSTAGRAM_URL,
+  OFFICIAL_INSTAGRAM_HANDLE,
+  BOX_DIMENSIONS_STR,
+} from '@/utils/brand';
+import ProductSpecs from './ProductSpecs';
 import {
   CreativeDiagonalRibbons,
   CreativeMolarIcon,
@@ -92,12 +99,25 @@ export default function HeroSection() {
 
             <p className="text-base sm:text-lg text-slate-300 max-w-2xl leading-relaxed">
               Freseros de aluminio grado médico resistentes y autoclavables a
-              134°C, compatibles con piezas de alta y baja velocidad. Elige tu
-              serie favorita o sube tu propia imagen a grabar y envía tu pedido
-              directo por WhatsApp al{' '}
-              <span className="text-[#8CC63F] font-extrabold">
-                {WHATSAPP_DISPLAY_NUMBER}
+              134°C, diseñados exclusivamente para{' '}
+              <strong className="text-white font-extrabold">
+                fresas de alta velocidad
+              </strong>
+              . Medidas exactas de{' '}
+              <span className="text-[#00AEEF] font-black">
+                {BOX_DIMENSIONS_STR}
               </span>
+              . Elige tu serie favorita o personaliza tu diseño y contáctanos por
+              Instagram en{' '}
+              <a
+                href={OFFICIAL_INSTAGRAM_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[#E5007D] hover:underline font-extrabold inline-flex items-center gap-1"
+              >
+                <Instagram className="w-4 h-4 inline" />
+                {OFFICIAL_INSTAGRAM_HANDLE}
+              </a>
               .
             </p>
 
@@ -301,7 +321,7 @@ export default function HeroSection() {
                   <p className="text-xs text-slate-300 mb-2.5 flex items-center justify-between font-medium">
                     <span>Acabado de aluminio anodizado:</span>
                     <span className="text-[#00AEEF] font-bold">
-                      Alta y Baja Velocidad
+                      Solo Alta Velocidad • {BOX_DIMENSIONS_STR}
                     </span>
                   </p>
                   <div className="grid grid-cols-6 gap-2.5">
@@ -346,8 +366,8 @@ export default function HeroSection() {
                 Elige Serie y Color
               </p>
               <p className="text-xs text-slate-300 mt-0.5">
-                Selecciona entre nuestras series oficiales o sube tu propio
-                logotipo/imagen.
+                Alta velocidad (7.3 × 2.8 × 2.5 cm). Elige tu color anodizado y
+                diseño o sube tu logo.
               </p>
             </div>
           </div>
@@ -361,23 +381,23 @@ export default function HeroSection() {
                 Simula el Grabado Láser
               </p>
               <p className="text-xs text-slate-300 mt-0.5">
-                Ajusta tamaño, rotación, acabado láser, tu nombre y tu
-                especialidad odontológica.
+                Ajusta tamaño, posición, acabado metálico, tu nombre y tu
+                especialidad odontológica en tiempo real.
               </p>
             </div>
           </div>
 
           <div className="p-4 rounded-2xl bg-[#11141E] border border-[#8CC63F]/40 flex items-center gap-4">
             <div className="w-10 h-10 rounded-xl bg-[#8CC63F]/20 border border-[#8CC63F] flex items-center justify-center text-[#8CC63F] shrink-0">
-              <MessageCircle className="w-5 h-5" />
+              <Truck className="w-5 h-5" />
             </div>
             <div>
               <p className="text-xs font-black text-[#8CC63F] uppercase tracking-wider">
-                Envía Pedido + Imagen ({WHATSAPP_DISPLAY_NUMBER})
+                Envío FedEx $150 o GRATIS (&gt;2 pzs)
               </p>
               <p className="text-xs text-slate-300 mt-0.5">
-                Tu diseño se copia y descarga automáticamente para enviarlo por
-                WhatsApp en un clic.
+                Envío nacional FedEx y entrega local en Chihuahua. Contacto
+                oficial por Instagram @creative.tools.mx.
               </p>
             </div>
           </div>

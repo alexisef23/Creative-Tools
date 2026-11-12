@@ -48,7 +48,10 @@ interface CustomizerStoreState {
   orderList: OrderItem[];
   isOrderDrawerOpen: boolean;
   setOrderDrawerOpen: (open: boolean) => void;
-  addToOrderList: (item: Omit<OrderItem, 'orderItemId'>) => void;
+  addToOrderList: (
+    item: Omit<OrderItem, 'orderItemId' | 'quantity'> & { quantity?: number }
+  ) => void;
+  updateOrderItemQuantity: (orderItemId: string, quantity: number) => void;
   removeFromOrderList: (orderItemId: string) => void;
   clearOrderList: () => void;
 }
@@ -166,12 +169,22 @@ export const useCustomizerStore = create<CustomizerStoreState>((set, get) => ({
         ...state.orderList,
         {
           ...item,
+          quantity: Math.max(1, item.quantity ?? 1),
           orderItemId: `ord-${Date.now()}-${Math.random()
             .toString(36)
             .slice(2, 7)}`,
         },
       ],
       isOrderDrawerOpen: true,
+    })),
+
+  updateOrderItemQuantity: (orderItemId, quantity) =>
+    set((state) => ({
+      orderList: state.orderList.map((i) =>
+        i.orderItemId === orderItemId
+          ? { ...i, quantity: Math.min(99, Math.max(1, Math.round(quantity))) }
+          : i
+      ),
     })),
 
   removeFromOrderList: (orderItemId) =>
