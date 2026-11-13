@@ -590,7 +590,7 @@ export default function LaserCanvasPreview() {
   };
 
   return (
-    <div className="rounded-3xl backdrop-blur-xl bg-white/[0.04] border border-white/15 p-4 sm:p-6 shadow-2xl flex flex-col gap-4">
+    <div className="rounded-3xl bg-slate-900 border border-slate-800 p-4 sm:p-6 shadow-2xl flex flex-col gap-4 text-white">
       {/* Top Status Bar */}
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">

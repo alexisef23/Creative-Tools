@@ -5,17 +5,17 @@
 @layer base {
   html {
     scroll-behavior: smooth;
-    color-scheme: dark;
+    color-scheme: light;
   }
 
   body {
-    @apply bg-[#0B0D13] text-slate-100 antialiased selection:bg-[#E5007D] selection:text-white;
+    @apply bg-[#F8FAFC] text-slate-900 antialiased selection:bg-[#E5007D] selection:text-white;
   }
 }
 
 @layer utilities {
   .glass-panel {
-    @apply backdrop-blur-md bg-[#11141E]/85 border border-white/10 shadow-glass-inset;
+    @apply backdrop-blur-md bg-white/90 border border-slate-200/80 shadow-sm;
   }
 
   .creative-border-top {

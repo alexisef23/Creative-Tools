@@ -2,6 +2,7 @@
 // Instagram es el canal principal de contacto, dudas y cotizaciones.
 export const INSTAGRAM_HANDLE = '@creative.tools.mx';
 export const INSTAGRAM_URL = 'https://www.instagram.com/creative.tools.mx';
+export const INSTAGRAM_DIRECT_URL = 'https://ig.me/m/creative.tools.mx';
 
 export const OFFICIAL_INSTAGRAM_URL = INSTAGRAM_URL;
 export const OFFICIAL_INSTAGRAM_HANDLE = INSTAGRAM_HANDLE;
