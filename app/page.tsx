@@ -2,14 +2,12 @@ import React from 'react';
 import Navbar from '@/components/Navbar';
 import HeroSection from '@/components/HeroSection';
 import ProductCatalog from '@/components/ProductCatalog';
-import ReferenceCatalogSection from '@/components/ReferenceCatalogSection';
 import LaserCustomizerStudio from '@/components/LaserCustomizerStudio';
 import CartDrawer from '@/components/CartDrawer';
 import { ShieldCheck, Truck, Instagram, Ruler, Zap } from 'lucide-react';
 import CreativeToolsLogo from '@/components/CreativeBrandLogo';
 import {
   OFFICIAL_INSTAGRAM_URL,
-  OFFICIAL_INSTAGRAM_HANDLE,
   BOX_DIMENSIONS_STR,
 } from '@/utils/brand';
 
@@ -20,7 +18,6 @@ export default function HomePage() {
 
       <main className="flex-1">
         <HeroSection />
-        <ReferenceCatalogSection />
         <ProductCatalog />
         <LaserCustomizerStudio />
       </main>

@@ -127,7 +127,7 @@ export default function HeroSection() {
               </a>
 
               <a
-                href="#catalogos-referencia"
+                href="#catalogo"
                 className="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 font-bold text-sm sm:text-base shadow-sm transition"
               >
                 Explorar Catálogo Oficial

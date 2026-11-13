@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Sparkles,
   Check,
@@ -13,6 +13,7 @@ import {
   Ruler,
   Zap,
   ClipboardList,
+  RefreshCw,
 } from 'lucide-react';
 import {
   ANODIZED_COLORS,
@@ -33,6 +34,8 @@ export default function ProductCatalog() {
     selectedCategory,
     setSelectedCategory,
     extraDiscoveredDesigns,
+    isSyncingCatalog,
+    syncCatalogFromDisk,
     loadProductIntoStudio,
     addToOrderList,
     setOrderDrawerOpen,
@@ -43,6 +46,21 @@ export default function ProductCatalog() {
   const [lightboxProduct, setLightboxProduct] = useState<ProductItem | null>(
     null
   );
+  const [syncFeedback, setSyncFeedback] = useState<string | null>(null);
+
+  useEffect(() => {
+    syncCatalogFromDisk();
+  }, [syncCatalogFromDisk]);
+
+  const handleManualSync = async () => {
+    const count = await syncCatalogFromDisk();
+    setSyncFeedback(
+      count > 0
+        ? `¡Se detectaron y agregaron ${count} nuevos diseños de tu carpeta Catalogo!`
+        : 'Carpeta Catalogo sincronizada al día.'
+    );
+    setTimeout(() => setSyncFeedback(null), 4000);
+  };
 
   const allPresets = useMemo(
     () => [...PRESET_DESIGNS, ...extraDiscoveredDesigns],
@@ -177,8 +195,26 @@ export default function ProductCatalog() {
               Lámina Original
             </button>
           </div>
+
+          <button
+            type="button"
+            onClick={handleManualSync}
+            disabled={isSyncingCatalog}
+            title="Sincronizar nuevos diseños de la carpeta Catalogo"
+            className="p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition flex items-center justify-center shrink-0"
+          >
+            <RefreshCw
+              className={`w-4 h-4 ${isSyncingCatalog ? 'animate-spin text-[#00AEEF]' : ''}`}
+            />
+          </button>
         </div>
       </div>
+
+      {syncFeedback && (
+        <div className="mb-6 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold">
+          {syncFeedback}
+        </div>
+      )}
 
       {/* Category Filter Pills (10 Series + Todos) */}
       <div className="flex items-center gap-2 overflow-x-auto pb-4 mb-8 scrollbar-thin">

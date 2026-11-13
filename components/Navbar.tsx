@@ -6,7 +6,6 @@ import { useCustomizerStore } from '@/hooks/useCustomizerStore';
 import {
   OFFICIAL_INSTAGRAM_URL,
   OFFICIAL_INSTAGRAM_HANDLE,
-  BOX_DIMENSIONS_STR,
 } from '@/utils/brand';
 import CreativeToolsLogo from './CreativeBrandLogo';
 
@@ -20,35 +19,18 @@ export default function Navbar() {
       <div className="h-1 w-full creative-border-top opacity-85" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-        {/* Official Creative Tools Brand Identity */}
-        <a href="#" className="flex items-center gap-3.5 group">
+        {/* Official Creative Tools Brand Identity with generous breathing room */}
+        <a href="#" className="flex items-center group">
           <CreativeToolsLogo size="md" showTagline={true} theme="light" />
-
-          <div className="hidden xl:block h-8 w-[1px] bg-slate-200 mx-2" />
-
-          <div className="hidden xl:block">
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200">
-              Custom <span className="text-[#00AEEF] mx-1">Design</span> Series
-            </span>
-            <p className="text-[11px] text-slate-500 mt-0.5">
-              Alta Velocidad • {BOX_DIMENSIONS_STR}
-            </p>
-          </div>
         </a>
 
-        {/* Navigation Links */}
-        <nav className="hidden md:flex items-center gap-6 text-sm font-semibold text-slate-600">
-          <a
-            href="#catalogos-referencia"
-            className="hover:text-slate-900 transition-colors"
-          >
-            Catálogos de Referencia
-          </a>
+        {/* Unified, Spacious Navigation Links */}
+        <nav className="hidden md:flex items-center gap-8 text-sm font-semibold text-slate-600">
           <a
             href="#catalogo"
             className="hover:text-slate-900 transition-colors"
           >
-            Colecciones por Serie
+            Catálogo de Diseños
           </a>
           <a
             href="#customizer-studio"
