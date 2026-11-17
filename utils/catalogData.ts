@@ -74,6 +74,24 @@ export const ANODIZED_COLORS: AnodizedColor[] = [
     laserTint: '#f3e8ff',
     badgeText: 'Tendencia',
   },
+  {
+    id: 'rose-gold',
+    name: 'Rose Gold Anodizado',
+    hex: '#be6a7a',
+    secondaryHex: '#6b323e',
+    highlightHex: '#f4acb7',
+    laserTint: '#fff1f2',
+    badgeText: 'Nuevo • Rose Gold',
+  },
+  {
+    id: 'anodized-silver',
+    name: 'Plateado Metálico (Silver)',
+    hex: '#64748b',
+    secondaryHex: '#334155',
+    highlightHex: '#cbd5e1',
+    laserTint: '#ffffff',
+    badgeText: 'Nuevo • Plateado',
+  },
 ];
 
 // Helper to safely encode URI paths with spaces and parentheses

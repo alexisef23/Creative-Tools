@@ -56,7 +56,7 @@ export default function HomePage() {
               </span>
               <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 border border-slate-700">
                 <Truck className="w-4 h-4 text-emerald-400" />
-                FedEx $150 MXN (GRATIS &gt; 2 pzs) • Chihuahua Local
+                FedEx $150 (GRATIS en 2 de $549 o 3 de $250) • Chihuahua Local
               </span>
               <a
                 href={OFFICIAL_INSTAGRAM_URL}

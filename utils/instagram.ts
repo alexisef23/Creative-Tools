@@ -1,9 +1,8 @@
 import { OrderCustomerDetails, OrderItem } from '@/types';
 import {
   BOX_DIMENSIONS_LABEL,
+  getOrderItemUnitPrice,
   INSTAGRAM_DIRECT_URL,
-  INSTAGRAM_HANDLE,
-  INSTAGRAM_URL,
 } from './brand';
 import { calculateShipping, formatMxn } from './shipping';
 
@@ -14,13 +13,31 @@ export function buildInstagramOrderText(
   const shipping = calculateShipping(items, customer.deliveryMethod);
 
   const itemLines = items.map((item, idx) => {
+    const qty = Math.max(1, item.quantity || 1);
+    const unitPrice = getOrderItemUnitPrice(item);
+    const lineTotal = unitPrice * qty;
+
+    if (item.itemType === 'extra_burs') {
+      return [
+        `🦷 ${idx + 1}. ${item.title}`,
+        `   • Cantidad: ${qty} kit(s) × ${formatMxn(unitPrice)} = ${formatMxn(lineTotal)}`,
+        `   • Especificación: FG 1.6mm Alta Velocidad (hasta 400,000 RPM)`,
+      ].join('\n');
+    }
+
     const desc =
       item.designMode === 'preset'
         ? `${item.title} (Ref: ${item.code})`
         : `Logo Personalizado (${item.uploadedFileName || 'Diseño propio'})`;
+
+    const modeLabel = item.includesBurs
+      ? 'Fresero + Kit de Fresas FG 1.6mm ($549 MXN)'
+      : 'Solo Fresero de Aluminio ($250 MXN)';
+
     return [
       `📦 ${idx + 1}. ${desc}`,
-      `   • Cantidad: ${item.quantity || 1} pz(s)`,
+      `   • Modalidad: ${modeLabel}`,
+      `   • Cantidad: ${qty} pz(s) × ${formatMxn(unitPrice)} = ${formatMxn(lineTotal)}`,
       `   • Color: ${item.color.name}`,
       item.customText ? `   • Texto en tapa: "${item.customText}"` : '',
       item.specialtyTag ? `   • Especialidad: "${item.specialtyTag}"` : '',
@@ -32,12 +49,12 @@ export function buildInstagramOrderText(
   return [
     '🦷 NUEVO PEDIDO DE FRESEROS PERSONALIZADOS - CREATIVE TOOLS',
     '',
-    'DISEÑOS SOLICITADOS:',
+    'PRODUCTOS SOLICITADOS:',
     ...itemLines,
     '',
     'ESPECIFICACIONES:',
-    `• Exclusivo para fresas de Alta Velocidad`,
-    `• Medidas: ${BOX_DIMENSIONS_LABEL}`,
+    `• Exclusivo para fresas de Alta Velocidad (FG 1.6 mm / hasta 400,000 RPM)`,
+    `• Medidas del fresero: ${BOX_DIMENSIONS_LABEL}`,
     '• Aluminio grado médico autoclavable 134°C',
     '',
     'DATOS DE ENTREGA (5 CAMPOS):',
@@ -48,12 +65,20 @@ export function buildInstagramOrderText(
     `• 5. Teléfono: ${customer.phone}`,
     customer.deliveryMethod === 'local'
       ? '• Entrega: Local en Municipio de Chihuahua'
-      : `• Entrega: FedEx Nacional (${
-          shipping.isFree ? 'GRATIS (>2 pzs)' : formatMxn(shipping.costMxn)
-        })`,
+      : `• Entrega: ${shipping.label}`,
     customer.notes?.trim() ? `• Notas: ${customer.notes.trim()}` : '',
     '',
-    `TOTAL PIEZAS: ${shipping.totalPieces}`,
+    'DESGLOSE DE PAGO:',
+    `• Subtotal productos (${shipping.totalPieces} pzs): ${formatMxn(shipping.subtotalMxn)}`,
+    `• Envío: ${
+      customer.deliveryMethod === 'local'
+        ? '$0 MXN (Entrega local Chihuahua)'
+        : shipping.isFree
+        ? 'GRATIS ($0 MXN)'
+        : formatMxn(shipping.costMxn)
+    }`,
+    `• TOTAL A PAGAR: ${formatMxn(shipping.totalMxn)}`,
+    '',
     '🖼️ (Te adjunto la imagen de mi diseño a grabar generado en el simulador)',
   ]
     .filter((l) => l !== '')

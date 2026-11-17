@@ -8,6 +8,12 @@ import {
   TransformState,
 } from '@/types';
 import { ANODIZED_COLORS, PRESET_DESIGNS } from '@/utils/catalogData';
+import {
+  getOrderItemUnitPrice,
+  PRICE_BOX_ONLY_MXN,
+  PRICE_BOX_WITH_BURS_MXN,
+  PRICE_EXTRA_BUR_KIT_MXN,
+} from '@/utils/brand';
 
 interface CustomizerStoreState {
   // Catalog filter
@@ -44,13 +50,15 @@ interface CustomizerStoreState {
   latestCanvasSnapshot: string;
   setLatestCanvasSnapshot: (dataUrl: string) => void;
 
-  // Order List (Lista de Pedido Directo sin precios)
+  // Order List con soporte de precios, freseros cargados y kits de fresas extra
   orderList: OrderItem[];
   isOrderDrawerOpen: boolean;
   setOrderDrawerOpen: (open: boolean) => void;
   addToOrderList: (
     item: Omit<OrderItem, 'orderItemId' | 'quantity'> & { quantity?: number }
   ) => void;
+  toggleOrderItemBurs: (orderItemId: string) => void;
+  addExtraBurKitToOrder: (quantity?: number, openDrawer?: boolean) => void;
   updateOrderItemQuantity: (orderItemId: string, quantity: number) => void;
   removeFromOrderList: (orderItemId: string) => void;
   clearOrderList: () => void;
@@ -164,19 +172,91 @@ export const useCustomizerStore = create<CustomizerStoreState>((set, get) => ({
   setOrderDrawerOpen: (open) => set({ isOrderDrawerOpen: open }),
 
   addToOrderList: (item) =>
+    set((state) => {
+      const includesBurs = Boolean(item.includesBurs);
+      const itemType = item.itemType ?? 'box';
+      const unitPrice = getOrderItemUnitPrice({
+        ...item,
+        itemType,
+        includesBurs,
+      });
+
+      return {
+        orderList: [
+          ...state.orderList,
+          {
+            ...item,
+            itemType,
+            includesBurs,
+            unitPrice,
+            quantity: Math.max(1, item.quantity ?? 1),
+            orderItemId: `ord-${Date.now()}-${Math.random()
+              .toString(36)
+              .slice(2, 7)}`,
+          },
+        ],
+        isOrderDrawerOpen: true,
+      };
+    }),
+
+  toggleOrderItemBurs: (orderItemId) =>
     set((state) => ({
-      orderList: [
-        ...state.orderList,
-        {
-          ...item,
-          quantity: Math.max(1, item.quantity ?? 1),
-          orderItemId: `ord-${Date.now()}-${Math.random()
-            .toString(36)
-            .slice(2, 7)}`,
-        },
-      ],
-      isOrderDrawerOpen: true,
+      orderList: state.orderList.map((i) => {
+        if (i.orderItemId !== orderItemId || i.itemType === 'extra_burs') {
+          return i;
+        }
+        const nextIncludesBurs = !i.includesBurs;
+        return {
+          ...i,
+          includesBurs: nextIncludesBurs,
+          unitPrice: nextIncludesBurs
+            ? PRICE_BOX_WITH_BURS_MXN
+            : PRICE_BOX_ONLY_MXN,
+        };
+      }),
     })),
+
+  addExtraBurKitToOrder: (quantity = 1, openDrawer = true) =>
+    set((state) => {
+      const addQty = Math.max(1, Math.round(quantity));
+      const existingIdx = state.orderList.findIndex(
+        (i) => i.itemType === 'extra_burs'
+      );
+
+      if (existingIdx >= 0) {
+        const updated = [...state.orderList];
+        updated[existingIdx] = {
+          ...updated[existingIdx],
+          quantity: Math.min(99, (updated[existingIdx].quantity || 1) + addQty),
+        };
+        return {
+          orderList: updated,
+          isOrderDrawerOpen: openDrawer ? true : state.isOrderDrawerOpen,
+        };
+      }
+
+      const newKitItem: OrderItem = {
+        orderItemId: `ord-kit-${Date.now()}-${Math.random()
+          .toString(36)
+          .slice(2, 6)}`,
+        itemType: 'extra_burs',
+        title: 'Kit Extra de Fresas Dentales FG 1.6 mm (Alta Velocidad)',
+        code: 'KIT-FRESAS',
+        series: 'Fresas Dentales',
+        color: ANODIZED_COLORS[7] || ANODIZED_COLORS[0],
+        designMode: 'preset',
+        customText: 'FG 1.6mm • 400,000 RPM • Diamante Natural',
+        previewDataUrl: '',
+        quantity: addQty,
+        includesBurs: true,
+        unitPrice: PRICE_EXTRA_BUR_KIT_MXN,
+      };
+
+      return {
+        orderList: [...state.orderList, newKitItem],
+        isOrderDrawerOpen: openDrawer ? true : state.isOrderDrawerOpen,
+      };
+    }),
 
   updateOrderItemQuantity: (orderItemId, quantity) =>
     set((state) => ({

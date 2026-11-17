@@ -297,12 +297,12 @@ export default function HeroSection() {
               {/* Quick Color Switcher */}
               <div className="mt-5">
                 <p className="text-xs text-slate-300 mb-2.5 flex items-center justify-between font-medium">
-                  <span>Color de aluminio anodizado:</span>
+                  <span>8 Colores Anodizados (incluye Rose Gold y Plateado):</span>
                   <span className="text-cyan-400 font-bold">
-                    Solo Alta Velocidad • {BOX_DIMENSIONS_STR}
+                    Desde $250 MXN
                   </span>
                 </p>
-                <div className="grid grid-cols-6 gap-2">
+                <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
                   {ANODIZED_COLORS.map((color) => {
                     const active = selectedColor.id === color.id;
                     return (
@@ -340,11 +340,11 @@ export default function HeroSection() {
             </div>
             <div>
               <p className="text-xs font-black text-slate-900 uppercase tracking-wider">
-                Elige Serie y Color
+                Solo Fresero ($250) o Cargado ($549)
               </p>
               <p className="text-xs text-slate-500 mt-0.5">
-                Alta velocidad (7.3 × 2.8 × 2.5 cm). Elige tu color anodizado y
-                diseño o sube tu logo.
+                Elige solo la cajita metálica ($250 MXN) o cárgala con fresas de
+                diamante FG 1.6 mm de alta velocidad ($549 MXN).
               </p>
             </div>
           </div>
@@ -358,8 +358,8 @@ export default function HeroSection() {
                 Simula el Grabado Láser
               </p>
               <p className="text-xs text-slate-500 mt-0.5">
-                Ajusta tamaño, posición, acabado metálico, tu nombre y tu
-                especialidad odontológica en tiempo real.
+                8 colores anodizados (incluyendo Rose Gold y Plateado). Ajusta
+                tu diseño, nombre y especialidad en tiempo real.
               </p>
             </div>
           </div>
@@ -370,11 +370,11 @@ export default function HeroSection() {
             </div>
             <div>
               <p className="text-xs font-black text-slate-900 uppercase tracking-wider">
-                Envío FedEx $150 o GRATIS (&gt;2 pzs)
+                Envío Gratis en 2 de $549 o 3 de $250
               </p>
               <p className="text-xs text-slate-500 mt-0.5">
-                Envío nacional FedEx y entrega local en Chihuahua. Contacto
-                oficial por Instagram @creative.tools.mx.
+                Envío FedEx ($150 MXN) GRATIS llevando 2 freseros cargados ($549)
+                o 3 freseros solos ($250).
               </p>
             </div>
           </div>

@@ -63,8 +63,11 @@ export interface TransformState {
   contrastThreshold: number; // 0 to 255 laser threshold
 }
 
+export type OrderItemType = 'box' | 'extra_burs';
+
 export interface OrderItem {
   orderItemId: string;
+  itemType?: OrderItemType; // 'box' (default) o 'extra_burs' (kit de fresas extra)
   title: string;
   code: string;
   series: string;
@@ -76,7 +79,9 @@ export interface OrderItem {
   customText?: string;
   specialtyTag?: string;
   previewDataUrl: string;
-  quantity: number; // Número de piezas (freseros) de este diseño
+  quantity: number; // Número de piezas de este ítem
+  includesBurs?: boolean; // false = Solo fresero ($250), true = Cargado con fresas ($549)
+  unitPrice?: number; // Precio unitario en MXN
 }
 
 export type DeliveryMethod = 'fedex' | 'local';

@@ -18,6 +18,10 @@ import {
   Truck,
   Plus,
   Minus,
+  Zap,
+  PackagePlus,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 import {
   ANODIZED_COLORS,
@@ -29,6 +33,11 @@ import {
   OFFICIAL_INSTAGRAM_URL,
   OFFICIAL_INSTAGRAM_HANDLE,
   BOX_DIMENSIONS_STR,
+  PRICE_BOX_ONLY_MXN,
+  PRICE_BOX_WITH_BURS_MXN,
+  PRICE_EXTRA_BUR_KIT_MXN,
+  DENTAL_BUR_FEATURES,
+  DENTAL_BUR_SPECS_TITLE,
 } from '@/utils/brand';
 import { LaserFontFamily, SeriesCategory } from '@/types';
 import LaserCanvasPreview from './LaserCanvasPreview';
@@ -49,6 +58,7 @@ export default function LaserCustomizerStudio() {
   const [studioSeriesFilter, setStudioSeriesFilter] =
     useState<SeriesCategory>('Todos');
   const [quantity, setQuantity] = useState<number>(1);
+  const [includesBurs, setIncludesBurs] = useState<boolean>(false);
   const [dispatchNotice, setDispatchNotice] = useState<string | null>(null);
 
   const {
@@ -66,8 +76,17 @@ export default function LaserCustomizerStudio() {
     updateTransform,
     latestCanvasSnapshot,
     addToOrderList,
+    addExtraBurKitToOrder,
     setOrderDrawerOpen,
   } = useCustomizerStore();
+
+  const currentUnitPrice = includesBurs
+    ? PRICE_BOX_WITH_BURS_MXN
+    : PRICE_BOX_ONLY_MXN;
+  const currentSubtotal = currentUnitPrice * quantity;
+  const qualifiesFreeShippingHere = includesBurs
+    ? quantity >= 2
+    : quantity >= 3;
 
   const allStudioPresets = [...PRESET_DESIGNS, ...extraDiscoveredDesigns];
 
@@ -103,6 +122,7 @@ export default function LaserCustomizerStudio() {
 
   const handleAddToOrderList = (openDrawer = false) => {
     addToOrderList({
+      itemType: 'box',
       title:
         designMode === 'preset'
           ? `Fresero ${selectedPreset.title}`
@@ -118,6 +138,8 @@ export default function LaserCustomizerStudio() {
       specialtyTag: transform.specialtyTag,
       previewDataUrl: latestCanvasSnapshot,
       quantity: Math.max(1, quantity),
+      includesBurs,
+      unitPrice: currentUnitPrice,
     });
 
     if (openDrawer) {
@@ -126,7 +148,7 @@ export default function LaserCustomizerStudio() {
       setDispatchNotice(
         `¡Diseño agregado a tu pedido (${quantity} ${
           quantity > 1 ? 'piezas' : 'pieza'
-        })! Abre "Mi Pedido" cuando estés listo para ingresar tus datos de entrega.`
+        } — $${currentSubtotal} MXN)! Abre "Mi Pedido" cuando estés listo para ingresar tus datos de entrega.`
       );
       setTimeout(() => setDispatchNotice(null), 4500);
     }
@@ -191,7 +213,7 @@ export default function LaserCustomizerStudio() {
                 </span>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+              <div className="grid grid-cols-2 gap-2.5">
                 {ANODIZED_COLORS.map((color) => {
                   const isSelected = selectedColor.id === color.id;
                   return (
@@ -485,16 +507,145 @@ export default function LaserCustomizerStudio() {
               </div>
             </div>
 
-            {/* STEP 3: Configuración y Envío de Pedido a Instagram */}
+            {/* STEP 3: Modalidad, Fresas Dentales y Envío de Pedido */}
             <div className="p-5 sm:p-6 rounded-2xl bg-white border border-slate-200 space-y-4 shadow-sm">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-black uppercase tracking-wider text-slate-900 flex items-center gap-1.5">
                   <UserCheck className="w-4 h-4 text-emerald-600" />
-                  Paso 3 • Resumen y Envío de Pedido
+                  Paso 3 • Modalidad y Precio del Fresero
                 </span>
-                <span className="text-[11px] font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200">
-                  Alta Velocidad
+                <span className="text-sm font-black text-slate-900 bg-slate-100 px-3 py-1 rounded-full border border-slate-200">
+                  ${currentUnitPrice} MXN c/u
                 </span>
+              </div>
+
+              {/* Opción 1: Solo Fresero ($250) + Botón Abajo para Cargar con Fresas ($549) */}
+              <div className="space-y-2.5">
+                <div
+                  onClick={() => setIncludesBurs(false)}
+                  className={`cursor-pointer p-3.5 rounded-xl border transition-all flex items-center justify-between ${
+                    !includesBurs
+                      ? 'bg-sky-50/80 border-[#00AEEF] ring-1 ring-[#00AEEF]'
+                      : 'bg-slate-50 hover:bg-slate-100 border-slate-200'
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <CheckCircle2
+                      className={`w-4 h-4 shrink-0 ${
+                        !includesBurs ? 'text-[#00AEEF]' : 'text-slate-300'
+                      }`}
+                    />
+                    <div>
+                      <p className="text-xs font-extrabold text-slate-900">
+                        Solo el Fresero (Cajita de Aluminio)
+                      </p>
+                      <p className="text-[11px] text-slate-500">
+                        Fresero metálico grabado láser (sin fresas incluidas)
+                      </p>
+                    </div>
+                  </div>
+                  <span className="text-sm font-black text-slate-900">
+                    ${PRICE_BOX_ONLY_MXN} MXN
+                  </span>
+                </div>
+
+                {/* Botón para Cargar con Fresas Dentales -> Pasa a $549 y desbloquea texto */}
+                <button
+                  type="button"
+                  onClick={() => setIncludesBurs((prev) => !prev)}
+                  className={`w-full p-3.5 rounded-xl border text-left transition-all flex items-center justify-between ${
+                    includesBurs
+                      ? 'bg-emerald-600 text-white border-emerald-600 shadow-md'
+                      : 'bg-amber-50 hover:bg-amber-100/80 text-slate-900 border-amber-300'
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <Zap
+                      className={`w-5 h-5 shrink-0 ${
+                        includesBurs ? 'text-amber-300' : 'text-amber-500'
+                      }`}
+                    />
+                    <div>
+                      <p className="text-xs font-black">
+                        {includesBurs
+                          ? '✓ Fresero Cargado con Fresas Dentales'
+                          : '⚡ Cargar mi fresero con fresas dentales'}
+                      </p>
+                      <p
+                        className={`text-[11px] ${
+                          includesBurs ? 'text-emerald-100' : 'text-slate-600'
+                        }`}
+                      >
+                        {includesBurs
+                          ? 'Incluye el kit completo de fresas FG 1.6 mm'
+                          : 'Haz clic para ver las fresas que incluye'}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <span className="text-sm font-black">
+                      ${PRICE_BOX_WITH_BURS_MXN} MXN
+                    </span>
+                    {includesBurs ? (
+                      <ChevronUp className="w-4 h-4" />
+                    ) : (
+                      <ChevronDown className="w-4 h-4" />
+                    )}
+                  </div>
+                </button>
+
+                {/* Texto desbloqueado con las especificaciones de las fresas */}
+                {includesBurs && (
+                  <div className="p-4 rounded-xl bg-emerald-50/80 border border-emerald-200 space-y-2.5 text-xs text-slate-700">
+                    <div className="flex items-center justify-between border-b border-emerald-200 pb-2">
+                      <span className="font-black text-emerald-950 uppercase tracking-wider text-[11px]">
+                        🦷 {DENTAL_BUR_SPECS_TITLE}
+                      </span>
+                      <span className="px-2 py-0.5 rounded-full bg-emerald-600 text-white font-bold text-[10px]">
+                        Incluido por ${PRICE_BOX_WITH_BURS_MXN}
+                      </span>
+                    </div>
+                    <ul className="space-y-1.5 text-[11px]">
+                      {DENTAL_BUR_FEATURES.map((feat) => (
+                        <li
+                          key={feat.id}
+                          className="flex items-start gap-2 leading-snug"
+                        >
+                          <span className="font-black text-emerald-700 shrink-0">
+                            {feat.id}.
+                          </span>
+                          <span>
+                            <strong className="text-slate-900">
+                              {feat.title}:
+                            </strong>{' '}
+                            {feat.detail}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Botón para agregar Kit de Fresas Extra ($299 MXN) */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    addExtraBurKitToOrder(1, false);
+                    setDispatchNotice(
+                      `¡Se agregó 1 Kit de Fresas Extra ($${PRICE_EXTRA_BUR_KIT_MXN} MXN) a tu pedido!`
+                    );
+                    setTimeout(() => setDispatchNotice(null), 4000);
+                  }}
+                  className="w-full py-2.5 px-3.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 text-xs font-extrabold flex items-center justify-between transition"
+                >
+                  <span className="flex items-center gap-2">
+                    <PackagePlus className="w-4 h-4 text-[#00AEEF]" />
+                    + Agregar Kit de Fresas Extra al pedido
+                  </span>
+                  <span className="font-black text-slate-900">
+                    +${PRICE_EXTRA_BUR_KIT_MXN} MXN
+                  </span>
+                </button>
               </div>
 
               {/* Shipping Policy Banner */}
@@ -507,7 +658,7 @@ export default function LaserCustomizerStudio() {
                     Envío Nacional FedEx: $150 MXN
                   </p>
                   <p className="text-emerald-700 font-semibold text-[11px]">
-                    ¡GRATIS en compras de más de 2 piezas (&gt; 2 pzs)!
+                    ¡GRATIS llevando 2 freseros con fresas ($549) o 3 freseros solos ($250)!
                   </p>
                 </div>
               </div>
@@ -519,13 +670,17 @@ export default function LaserCustomizerStudio() {
                     Cantidad de freseros:
                   </p>
                   <p className="text-[11px] text-slate-500">
-                    {quantity > 2 ? (
+                    {qualifiesFreeShippingHere ? (
                       <span className="text-emerald-600 font-bold">
                         ✓ Califica para Envío FedEx GRATIS
                       </span>
+                    ) : includesBurs ? (
+                      <span>
+                        Agrega {2 - quantity} fresero(s) cargado(s) más para envío gratis
+                      </span>
                     ) : (
                       <span>
-                        Faltan {3 - quantity} pieza(s) para envío gratis
+                        Con freseros solos ($250) requieres {3 - quantity} más para envío gratis
                       </span>
                     )}
                   </p>
@@ -557,15 +712,17 @@ export default function LaserCustomizerStudio() {
               {/* Live Configuration Summary Box */}
               <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-1.5 text-slate-600">
                 <div className="flex justify-between">
-                  <span className="text-slate-500">Dimensiones:</span>
-                  <span className="font-bold text-slate-900 font-mono">
-                    {BOX_DIMENSIONS_STR}
+                  <span className="text-slate-500">Modalidad:</span>
+                  <span className="font-bold text-slate-900">
+                    {includesBurs
+                      ? `Fresero + Fresas ($${PRICE_BOX_WITH_BURS_MXN})`
+                      : `Solo Fresero ($${PRICE_BOX_ONLY_MXN})`}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-500">Compatibilidad:</span>
-                  <span className="font-bold text-amber-600">
-                    Fresas de Alta Velocidad
+                  <span className="text-slate-500">Dimensiones:</span>
+                  <span className="font-bold text-slate-900 font-mono">
+                    {BOX_DIMENSIONS_STR}
                   </span>
                 </div>
                 <div className="flex justify-between">
@@ -582,17 +739,13 @@ export default function LaserCustomizerStudio() {
                       : uploadedFileName || 'Logo Propio Personalizado'}
                   </span>
                 </div>
-                <div className="flex justify-between items-center pt-1 border-t border-slate-200">
-                  <span className="text-slate-500">Cuenta de Instagram:</span>
-                  <a
-                    href={OFFICIAL_INSTAGRAM_URL}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-bold text-[#E5007D] hover:underline inline-flex items-center gap-1"
-                  >
-                    <Instagram className="w-3.5 h-3.5" />
-                    {OFFICIAL_INSTAGRAM_HANDLE}
-                  </a>
+                <div className="flex justify-between items-center pt-1.5 border-t border-slate-200">
+                  <span className="font-bold text-slate-800">
+                    Subtotal ({quantity} {quantity > 1 ? 'piezas' : 'pieza'}):
+                  </span>
+                  <span className="text-sm font-black text-slate-900">
+                    ${currentSubtotal} MXN
+                  </span>
                 </div>
               </div>
 
@@ -603,8 +756,8 @@ export default function LaserCustomizerStudio() {
                 className="w-full inline-flex items-center justify-center gap-2.5 py-3.5 px-5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs sm:text-sm shadow-md hover:shadow-lg active:scale-[0.99] transition"
               >
                 <ClipboardList className="w-4 h-4 text-cyan-400" />
-                Hacer Pedido de este Fresero ({quantity}{' '}
-                {quantity > 1 ? 'piezas' : 'pieza'})
+                Hacer Pedido ({quantity} {quantity > 1 ? 'pzs' : 'pza'} — $
+                {currentSubtotal} MXN)
               </button>
 
               {/* Secondary CTA: Add to Order List */}

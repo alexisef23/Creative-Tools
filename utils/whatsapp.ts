@@ -1,6 +1,5 @@
 import { OrderCustomerDetails, OrderItem } from '@/types';
-import { BOX_DIMENSIONS_LABEL, INSTAGRAM_HANDLE } from './brand';
-import { calculateShipping, formatMxn, LOCAL_CITY_LABEL } from './shipping';
+import { buildInstagramOrderText } from './instagram';
 
 // Canal interno de recepción de pedidos (no se muestra en la interfaz).
 // El contacto público para dudas y cotizaciones es Instagram (ver utils/brand.ts).
@@ -10,63 +9,7 @@ export function buildOrderMessageText(
   items: OrderItem[],
   customer: OrderCustomerDetails
 ): string {
-  const shipping = calculateShipping(items, customer.deliveryMethod);
-
-  const itemLines = items.map((item, index) => {
-    const designDesc =
-      item.designMode === 'preset'
-        ? `${item.title} (Código: ${item.code})`
-        : `Logo Propio (${item.uploadedFileName || 'Imagen personalizada'})`;
-    return [
-      `${index + 1}. *${designDesc}*`,
-      `   • Piezas: ${item.quantity}`,
-      `   • Color Fresero: ${item.color.name}`,
-      item.customText ? `   • Texto en tapa: "${item.customText}"` : '',
-    ]
-      .filter(Boolean)
-      .join('\n');
-  });
-
-  const deliveryLine =
-    customer.deliveryMethod === 'local'
-      ? `• *Entrega:* Local dentro del ${LOCAL_CITY_LABEL} (por acordar)`
-      : `• *Entrega:* Envío nacional FedEx`;
-
-  const lines = [
-    '🦷 *NUEVO PEDIDO DE FRESEROS GRABADOS LÁSER - CREATIVE TOOLS*',
-    '',
-    '*DISEÑOS SOLICITADOS:*',
-    ...itemLines,
-    '',
-    '*ESPECIFICACIONES:*',
-    `• Freseros para fresas de *alta velocidad*`,
-    `• Medidas: ${BOX_DIMENSIONS_LABEL} (largo × alto × ancho)`,
-    '• Aluminio grado médico anodizado, autoclavable 134 °C',
-    '',
-    '*DATOS DE ENVÍO:*',
-    `• *Nombre completo:* ${customer.fullName}`,
-    `• *Calle y número:* ${customer.street}`,
-    `• *Colonia:* ${customer.neighborhood}`,
-    `• *Código postal:* ${customer.postalCode}`,
-    `• *Teléfono de contacto:* ${customer.phone}`,
-    deliveryLine,
-    customer.notes.trim() ? `• *Notas:* ${customer.notes.trim()}` : '',
-    '',
-    '*RESUMEN:*',
-    `• Total de piezas: ${shipping.totalPieces}`,
-    customer.deliveryMethod === 'local'
-      ? '• Costo de envío: Por acordar (entrega local)'
-      : `• Costo de envío FedEx: ${
-          shipping.isFree ? 'GRATIS (más de 2 piezas)' : formatMxn(shipping.costMxn)
-        }`,
-    '',
-    '🖼️ *IMÁGENES A GRABAR:*',
-    '_(Adjunto en este chat la vista previa del fresero y el arte a grabar)_',
-    '',
-    `Contacto Instagram: ${INSTAGRAM_HANDLE}`,
-  ].filter((l) => l !== '');
-
-  return lines.join('\n');
+  return buildInstagramOrderText(items, customer);
 }
 
 export function buildOrderWhatsAppUrl(

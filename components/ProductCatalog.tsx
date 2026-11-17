@@ -14,6 +14,9 @@ import {
   Zap,
   ClipboardList,
   RefreshCw,
+  PackagePlus,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 import {
   ANODIZED_COLORS,
@@ -27,6 +30,11 @@ import {
   OFFICIAL_INSTAGRAM_URL,
   OFFICIAL_INSTAGRAM_HANDLE,
   BOX_DIMENSIONS_STR,
+  PRICE_BOX_ONLY_MXN,
+  PRICE_BOX_WITH_BURS_MXN,
+  PRICE_EXTRA_BUR_KIT_MXN,
+  DENTAL_BUR_FEATURES,
+  DENTAL_BUR_SPECS_TITLE,
 } from '@/utils/brand';
 
 export default function ProductCatalog() {
@@ -38,6 +46,7 @@ export default function ProductCatalog() {
     syncCatalogFromDisk,
     loadProductIntoStudio,
     addToOrderList,
+    addExtraBurKitToOrder,
     setOrderDrawerOpen,
   } = useCustomizerStore();
 
@@ -47,6 +56,10 @@ export default function ProductCatalog() {
     null
   );
   const [syncFeedback, setSyncFeedback] = useState<string | null>(null);
+  // Estado por producto: false = Solo Fresero ($250), true = Cargado con Fresas ($549)
+  const [loadedBursByProduct, setLoadedBursByProduct] = useState<
+    Record<string, boolean>
+  >({});
 
   useEffect(() => {
     syncCatalogFromDisk();
@@ -60,6 +73,13 @@ export default function ProductCatalog() {
         : 'Carpeta Catalogo sincronizada al día.'
     );
     setTimeout(() => setSyncFeedback(null), 4000);
+  };
+
+  const toggleProductBurs = (productId: string) => {
+    setLoadedBursByProduct((prev) => ({
+      ...prev,
+      [productId]: !prev[productId],
+    }));
   };
 
   const allPresets = useMemo(
@@ -109,8 +129,10 @@ export default function ProductCatalog() {
     const preset =
       allPresets.find((p) => p.id === product.presetDesignId) ||
       PRESET_DESIGNS[0];
+    const includesBurs = Boolean(loadedBursByProduct[product.id]);
 
     addToOrderList({
+      itemType: 'box',
       title: product.name,
       code: product.code,
       series: product.series,
@@ -119,6 +141,8 @@ export default function ProductCatalog() {
       presetDesign: preset,
       customText: `CATÁLOGO ${product.code}`,
       previewDataUrl: product.imageUrl || '',
+      includesBurs,
+      unitPrice: includesBurs ? PRICE_BOX_WITH_BURS_MXN : PRICE_BOX_ONLY_MXN,
     });
   };
 
@@ -128,7 +152,7 @@ export default function ProductCatalog() {
       className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-white"
     >
       {/* Section Header */}
-      <div className="flex flex-col lg:flex-row lg:items-end justify-between mb-8 gap-6">
+      <div className="flex flex-col lg:flex-row lg:items-end justify-between mb-6 gap-6">
         <div>
           <div className="inline-flex items-center gap-2 text-[#00AEEF] text-xs font-black uppercase tracking-wider mb-2">
             <Layers className="w-4 h-4 text-[#00AEEF]" />
@@ -140,20 +164,12 @@ export default function ProductCatalog() {
             <span className="text-[#059669]">Personalizados</span>
           </h2>
           <p className="text-slate-600 text-sm sm:text-base mt-2 max-w-2xl">
-            Explora todos los diseños oficiales por serie. Fabricados en
-            aluminio grado médico esterilizable para fresas de{' '}
-            <strong className="text-slate-900">alta velocidad</strong> ({BOX_DIMENSIONS_STR}
-            ). Personalízalos o haz tu pedido directo. Dudas y contacto oficial
-            en Instagram:{' '}
-            <a
-              href={OFFICIAL_INSTAGRAM_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[#00AEEF] hover:underline font-bold"
-            >
-              {OFFICIAL_INSTAGRAM_HANDLE}
-            </a>
-            .
+            Elige solo el fresero metálico (<strong>${PRICE_BOX_ONLY_MXN} MXN</strong>) o
+            actívale el botón para <strong>cargarlo con fresas dentales FG 1.6 mm</strong>{' '}
+            (<strong>${PRICE_BOX_WITH_BURS_MXN} MXN</strong>). Envío FedEx{' '}
+            <strong className="text-emerald-700">GRATIS</strong> llevando{' '}
+            <strong>2 freseros cargados (${PRICE_BOX_WITH_BURS_MXN})</strong> o{' '}
+            <strong>3 freseros solos (${PRICE_BOX_ONLY_MXN})</strong>.
           </p>
         </div>
 
@@ -204,10 +220,42 @@ export default function ProductCatalog() {
             className="p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition flex items-center justify-center shrink-0"
           >
             <RefreshCw
-              className={`w-4 h-4 ${isSyncingCatalog ? 'animate-spin text-[#00AEEF]' : ''}`}
+              className={`w-4 h-4 ${
+                isSyncingCatalog ? 'animate-spin text-[#00AEEF]' : ''
+              }`}
             />
           </button>
         </div>
+      </div>
+
+      {/* Quick Extra Bur Kit Banner */}
+      <div className="mb-6 p-4 rounded-2xl bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-md">
+        <div className="flex items-start sm:items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-amber-400/20 border border-amber-400/40 flex items-center justify-center shrink-0">
+            <Zap className="w-5 h-5 text-amber-300" />
+          </div>
+          <div>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs sm:text-sm font-black text-white">
+                ¿Necesitas un Kit de Fresas Dentales Extra?
+              </span>
+              <span className="px-2 py-0.5 rounded-full text-[11px] font-black bg-emerald-500 text-slate-950">
+                +${PRICE_EXTRA_BUR_KIT_MXN} MXN
+              </span>
+            </div>
+            <p className="text-xs text-slate-300 mt-0.5">
+              FG 1.6 mm para pieza de alta velocidad (hasta 400,000 RPM) • Polvo de diamante natural • Acero inoxidable esterilizable.
+            </p>
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={() => addExtraBurKitToOrder(1, true)}
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs shrink-0 transition shadow-sm"
+        >
+          <PackagePlus className="w-4 h-4" />
+          Agregar Kit de Fresas Extra (${PRICE_EXTRA_BUR_KIT_MXN})
+        </button>
       </div>
 
       {syncFeedback && (
@@ -246,6 +294,10 @@ export default function ProductCatalog() {
           const preset =
             allPresets.find((p) => p.id === product.presetDesignId) ||
             PRESET_DESIGNS[0];
+          const isLoadedWithBurs = Boolean(loadedBursByProduct[product.id]);
+          const currentPrice = isLoadedWithBurs
+            ? PRICE_BOX_WITH_BURS_MXN
+            : PRICE_BOX_ONLY_MXN;
 
           return (
             <article
@@ -276,7 +328,16 @@ export default function ProductCatalog() {
                   </span>
 
                   <div className="flex items-center gap-1.5">
-                    <span className="px-2.5 py-1 rounded-full text-[11px] font-mono font-bold bg-white/90 text-slate-900 border border-white/40 shadow-sm">
+                    <span
+                      className={`px-2.5 py-1 rounded-full text-xs font-black shadow-sm ${
+                        isLoadedWithBurs
+                          ? 'bg-emerald-500 text-white'
+                          : 'bg-white text-slate-900 border border-slate-200'
+                      }`}
+                    >
+                      ${currentPrice} MXN
+                    </span>
+                    <span className="px-2 py-1 rounded-full text-[11px] font-mono font-bold bg-black/60 text-white">
                       {product.code}
                     </span>
                     {product.imageUrl && (
@@ -353,36 +414,127 @@ export default function ProductCatalog() {
               {/* Card Body */}
               <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
                 <div>
-                  <h3 className="text-base font-extrabold text-slate-900 group-hover:text-[#00AEEF] transition-colors">
-                    {product.name}
-                  </h3>
+                  <div className="flex items-start justify-between gap-2">
+                    <h3 className="text-base font-extrabold text-slate-900 group-hover:text-[#00AEEF] transition-colors">
+                      {product.name}
+                    </h3>
+                    <span className="text-sm font-black text-slate-900 shrink-0">
+                      ${currentPrice}{' '}
+                      <span className="text-[10px] font-bold text-slate-400">
+                        MXN
+                      </span>
+                    </span>
+                  </div>
                   <p className="text-xs text-slate-500 mt-1 line-clamp-2">
                     {preset.description}
                   </p>
 
                   {/* Specs List */}
-                  <div className="mt-3.5 pt-3 border-t border-slate-100 space-y-1.5 text-xs text-slate-600">
-                    <div className="flex items-center gap-2">
-                      <Zap className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-                      <span className="font-semibold text-slate-900">
-                        Solo Fresas de Alta Velocidad
-                      </span>
-                    </div>
+                  <div className="mt-3 pt-3 border-t border-slate-100 space-y-1 text-xs text-slate-600">
                     <div className="flex items-center gap-2">
                       <Ruler className="w-3.5 h-3.5 text-[#00AEEF] shrink-0" />
                       <span>
-                        Medidas: <strong className="text-slate-800">{BOX_DIMENSIONS_STR}</strong>
+                        Fresero de aluminio:{' '}
+                        <strong className="text-slate-800">
+                          {BOX_DIMENSIONS_STR}
+                        </strong>
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
                       <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                       <span>
-                        Ref:{' '}
-                        <strong className="text-slate-900">
-                          {product.code}
+                        Modalidad:{' '}
+                        <strong
+                          className={
+                            isLoadedWithBurs
+                              ? 'text-emerald-700'
+                              : 'text-slate-900'
+                          }
+                        >
+                          {isLoadedWithBurs
+                            ? `Fresero Cargado con Fresas ($${PRICE_BOX_WITH_BURS_MXN})`
+                            : `Solo Fresero Metálico ($${PRICE_BOX_ONLY_MXN})`}
                         </strong>
                       </span>
                     </div>
+                  </div>
+
+                  {/* Interactive Button: Cargar con Fresas Dentales ($549 MXN) */}
+                  <div className="mt-3">
+                    <button
+                      type="button"
+                      onClick={() => toggleProductBurs(product.id)}
+                      className={`w-full py-2.5 px-3 rounded-xl border text-xs font-extrabold flex items-center justify-between transition-all ${
+                        isLoadedWithBurs
+                          ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm'
+                          : 'bg-amber-50 hover:bg-amber-100/80 text-slate-900 border-amber-300'
+                      }`}
+                    >
+                      <span className="flex items-center gap-1.5">
+                        <Zap
+                          className={`w-4 h-4 ${
+                            isLoadedWithBurs ? 'text-amber-300' : 'text-amber-500'
+                          }`}
+                        />
+                        {isLoadedWithBurs
+                          ? `¡Cargado con Fresas Dentales! ($${PRICE_BOX_WITH_BURS_MXN})`
+                          : `Cargar con fresas dentales ($${PRICE_BOX_WITH_BURS_MXN})`}
+                      </span>
+                      {isLoadedWithBurs ? (
+                        <ChevronUp className="w-4 h-4 shrink-0" />
+                      ) : (
+                        <ChevronDown className="w-4 h-4 shrink-0" />
+                      )}
+                    </button>
+
+                    {/* Unlocked Bur Specifications Panel */}
+                    {isLoadedWithBurs && (
+                      <div className="mt-2 p-3 rounded-xl bg-emerald-50/70 border border-emerald-200 text-[11px] text-slate-700 space-y-2 animate-fadeIn">
+                        <div className="flex items-center justify-between border-b border-emerald-200/80 pb-1.5">
+                          <span className="font-black text-emerald-900 uppercase tracking-wider text-[10px]">
+                            {DENTAL_BUR_SPECS_TITLE}
+                          </span>
+                          <span className="font-bold text-emerald-700 text-[10px]">
+                            Incluido
+                          </span>
+                        </div>
+                        <ul className="space-y-1 text-[11px] text-slate-700">
+                          {DENTAL_BUR_FEATURES.map((feat) => (
+                            <li
+                              key={feat.id}
+                              className="flex items-start gap-1.5 leading-snug"
+                            >
+                              <span className="font-black text-emerald-700 shrink-0">
+                                {feat.id}.
+                              </span>
+                              <span>
+                                <strong className="text-slate-900">
+                                  {feat.title}:
+                                </strong>{' '}
+                                {feat.detail}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                        <div className="pt-1.5 border-t border-emerald-200/70 flex items-center justify-between">
+                          <button
+                            type="button"
+                            onClick={() => addExtraBurKitToOrder(1, true)}
+                            className="inline-flex items-center gap-1 text-[11px] font-extrabold text-[#00AEEF] hover:underline"
+                          >
+                            <PackagePlus className="w-3.5 h-3.5" />+ Agregar kit
+                            de fresas extra (${PRICE_EXTRA_BUR_KIT_MXN})
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => toggleProductBurs(product.id)}
+                            className="text-[10px] font-semibold text-slate-500 hover:text-slate-800 underline"
+                          >
+                            Cambiar a solo fresero (${PRICE_BOX_ONLY_MXN})
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -403,7 +555,7 @@ export default function ProductCatalog() {
                       className="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-sky-50 hover:bg-sky-100 text-[#00AEEF] border border-sky-200 text-xs font-extrabold transition"
                     >
                       <PlusCircle className="w-3.5 h-3.5" />
-                      Sumar al Pedido
+                      Sumar (${currentPrice})
                     </button>
                   </div>
 
@@ -416,7 +568,8 @@ export default function ProductCatalog() {
                     className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white border border-slate-900 text-xs font-extrabold transition shadow-sm"
                   >
                     <ClipboardList className="w-3.5 h-3.5 text-cyan-400" />
-                    Hacer Pedido de este Modelo ({product.code})
+                    Pedir {isLoadedWithBurs ? 'Cargado' : 'Solo Fresero'} — $
+                    {currentPrice} MXN
                   </button>
                 </div>
               </div>

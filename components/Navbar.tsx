@@ -5,13 +5,17 @@ import { Sparkles, ClipboardList, Instagram } from 'lucide-react';
 import { useCustomizerStore } from '@/hooks/useCustomizerStore';
 import {
   OFFICIAL_INSTAGRAM_URL,
-  OFFICIAL_INSTAGRAM_HANDLE,
+  getOrderItemUnitPrice,
 } from '@/utils/brand';
 import CreativeToolsLogo from './CreativeBrandLogo';
 
 export default function Navbar() {
   const { orderList, setOrderDrawerOpen } = useCustomizerStore();
   const totalPieces = orderList.reduce((acc, i) => acc + (i.quantity || 1), 0);
+  const subtotal = orderList.reduce(
+    (acc, i) => acc + getOrderItemUnitPrice(i) * (i.quantity || 1),
+    0
+  );
 
   return (
     <header className="sticky top-0 z-40 w-full backdrop-blur-md bg-white/95 border-b border-slate-200/90 shadow-sm transition-colors">
@@ -63,7 +67,7 @@ export default function Navbar() {
             <span>Mi Pedido</span>
             {totalPieces > 0 && (
               <span className="px-2 py-0.5 text-xs rounded-full bg-[#E5007D] text-white font-black shadow-sm">
-                {totalPieces}
+                {totalPieces} • ${subtotal}
               </span>
             )}
           </button>
