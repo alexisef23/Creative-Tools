@@ -4,7 +4,11 @@ import './globals.css';
 export const metadata: Metadata = {
   title: 'Creative Tools | Freseros de Aluminio Grado Médico con Grabado Láser',
   description:
-    'Diseña tu fresero dental de aluminio anodizado 100% autoclavable (134°C). Catálogo por series y Estudio Interactivo de Grabado Láser en tiempo real.',
+    'Diseña tu fresero dental de aluminio anodizado 100% autoclavable (134°C) para fresas de alta velocidad. Catálogo por series y Estudio Interactivo de Grabado Láser en tiempo real.',
+  icons: {
+    icon: '/brand/logo-icon.jpg',
+    apple: '/brand/logo-icon.jpg',
+  },
 };
 
 export default function RootLayout({
@@ -13,7 +17,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="es" className="dark">
+    <html lang="es">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
@@ -26,7 +30,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="min-h-screen bg-zinc-950 font-sans text-slate-100">
+      <body className="min-h-screen bg-[#F8FAFC] font-sans text-slate-900">
         {children}
       </body>
     </html>
