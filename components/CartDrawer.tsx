@@ -130,8 +130,8 @@ export default function CartDrawer() {
         className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"
       />
 
-      <div className="fixed inset-y-0 right-0 max-w-full flex pl-6 sm:pl-10">
-        <div className="w-screen max-w-lg bg-white text-slate-900 border-l border-slate-200 shadow-2xl flex flex-col justify-between">
+      <div className="fixed inset-y-0 right-0 max-w-full w-full sm:w-auto flex justify-end pl-3 sm:pl-10">
+        <div className="w-full max-w-lg bg-white text-slate-900 border-l border-slate-200 shadow-2xl flex flex-col justify-between overflow-hidden">
           {/* Header */}
           <div>
             <div className="h-1 w-full creative-border-top" />

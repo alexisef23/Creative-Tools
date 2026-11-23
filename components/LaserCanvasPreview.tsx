@@ -32,6 +32,12 @@ export default function LaserCanvasPreview() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const uploadedImgObjRef = useRef<HTMLImageElement | null>(null);
   const presetImgObjRef = useRef<HTMLImageElement | null>(null);
+  const stencilCacheRef = useRef<{
+    key: string;
+    canvas: HTMLCanvasElement;
+    drawW: number;
+    drawH: number;
+  } | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState<{ x: number; y: number }>({
     x: 0,
@@ -82,7 +88,7 @@ export default function LaserCanvasPreview() {
     img.src = selectedPreset.imageUrl;
   }, [selectedPreset]);
 
-  // Helper: convert an HTMLImageElement (from Catalogo or Custom Upload) into a metallic laser stencil
+  // Helper: convert & cache any logo/catalog image as a crisp, anti-aliased metallic laser stencil
   const drawLaserEtchedImage = (
     ctx: CanvasRenderingContext2D,
     img: HTMLImageElement,
@@ -94,20 +100,39 @@ export default function LaserCanvasPreview() {
       laserFinish: LaserFinishMode;
     }
   ) => {
-    const maxW = 390;
-    const maxH = 220;
-    const ratio = Math.min(maxW / img.width, maxH / img.height);
-    const drawW = Math.max(1, Math.round(img.width * ratio));
-    const drawH = Math.max(1, Math.round(img.height * ratio));
+    const cacheKey = `${img.src}|${options.isReferenceCatalog}|${options.threshold}|${options.invert}|${options.laserTintHex}|${options.laserFinish}`;
+    const cached = stencilCacheRef.current;
 
-    const offCanvas = document.createElement('canvas');
-    offCanvas.width = drawW;
-    offCanvas.height = drawH;
-    const offCtx = offCanvas.getContext('2d');
-    if (!offCtx) return;
+    if (cached && cached.key === cacheKey) {
+      ctx.drawImage(
+        cached.canvas,
+        -cached.drawW / 2,
+        -cached.drawH / 2,
+        cached.drawW,
+        cached.drawH
+      );
+      return;
+    }
 
-    offCtx.drawImage(img, 0, 0, drawW, drawH);
-    const imgData = offCtx.getImageData(0, 0, drawW, drawH);
+    const srcW = img.naturalWidth || img.width || 400;
+    const srcH = img.naturalHeight || img.height || 400;
+
+    // Step 1: Rasterize source at high resolution (max 800px) so SVGs & small logos stay sharp
+    const sampleScale = Math.min(1, 800 / Math.max(srcW, srcH));
+    const sampleW = Math.max(1, Math.round(srcW * sampleScale));
+    const sampleH = Math.max(1, Math.round(srcH * sampleScale));
+
+    const workCanvas = document.createElement('canvas');
+    workCanvas.width = sampleW;
+    workCanvas.height = sampleH;
+    const workCtx = workCanvas.getContext('2d');
+    if (!workCtx) return;
+
+    workCtx.imageSmoothingEnabled = true;
+    workCtx.imageSmoothingQuality = 'high';
+    workCtx.drawImage(img, 0, 0, sampleW, sampleH);
+
+    const imgData = workCtx.getImageData(0, 0, sampleW, sampleH);
     const data = imgData.data;
 
     // Parse laserTint hex to RGB based on laserFinish mode
@@ -130,32 +155,68 @@ export default function LaserCanvasPreview() {
       bTint = parseInt(hex.substring(4, 6), 16) || 249;
     }
 
-    // Sample background color slightly inside the corners
-    const insetX = Math.max(2, Math.floor(drawW * 0.06));
-    const insetY = Math.max(2, Math.floor(drawH * 0.06));
-    const sampleIdx = (insetY * drawW + insetX) * 4;
-    const bgR = data[sampleIdx];
-    const bgG = data[sampleIdx + 1];
-    const bgB = data[sampleIdx + 2];
+    // Detect whether the image has real transparency or a solid opaque background (e.g. JPG logo)
+    const insetX = Math.max(2, Math.floor(sampleW * 0.04));
+    const insetY = Math.max(2, Math.floor(sampleH * 0.04));
+    const cornerCoords = [
+      [insetX, insetY],
+      [sampleW - 1 - insetX, insetY],
+      [insetX, sampleH - 1 - insetY],
+      [sampleW - 1 - insetX, sampleH - 1 - insetY],
+    ];
 
-    for (let y = 0; y < drawH; y++) {
-      for (let x = 0; x < drawW; x++) {
-        const p = (y * drawW + x) * 4;
+    let transparentCorners = 0;
+    let bgR = 0;
+    let bgG = 0;
+    let bgB = 0;
+    for (const [cx, cy] of cornerCoords) {
+      const idx = (cy * sampleW + cx) * 4;
+      if (data[idx + 3] < 40) {
+        transparentCorners++;
+      } else {
+        bgR += data[idx];
+        bgG += data[idx + 1];
+        bgB += data[idx + 2];
+      }
+    }
+
+    const hasTransparentBg = transparentCorners >= 2;
+    const opaqueCount = 4 - transparentCorners;
+    if (opaqueCount > 0) {
+      bgR = Math.round(bgR / opaqueCount);
+      bgG = Math.round(bgG / opaqueCount);
+      bgB = Math.round(bgB / opaqueCount);
+    }
+
+    const smoothstep = (edge0: number, edge1: number, val: number) => {
+      const t = Math.max(0, Math.min(1, (val - edge0) / (edge1 - edge0)));
+      return t * t * (3 - 2 * t);
+    };
+
+    // Track tight non-empty bounding box for auto-trimming excess margins
+    let minX = sampleW;
+    let minY = sampleH;
+    let maxX = 0;
+    let maxY = 0;
+
+    for (let y = 0; y < sampleH; y++) {
+      for (let x = 0; x < sampleW; x++) {
+        const p = (y * sampleW + x) * 4;
         const alpha = data[p + 3];
 
         // Skip outer frame border on reference cards if within 3% of edge
         if (
           options.isReferenceCatalog &&
-          (x < drawW * 0.03 ||
-            x > drawW * 0.97 ||
-            y < drawH * 0.03 ||
-            y > drawH * 0.97)
+          (x < sampleW * 0.03 ||
+            x > sampleW * 0.97 ||
+            y < sampleH * 0.03 ||
+            y > sampleH * 0.97)
         ) {
           data[p + 3] = 0;
           continue;
         }
 
-        if (alpha < 32) {
+        if (alpha < 12) {
           data[p + 3] = 0;
           continue;
         }
@@ -164,50 +225,140 @@ export default function LaserCanvasPreview() {
         const g = data[p + 1];
         const b = data[p + 2];
 
-        if (options.isReferenceCatalog) {
+        let outAlpha = 0;
+
+        if (options.isReferenceCatalog || !hasTransparentBg) {
+          // Solid-background removal (preserves ALL colored company logos cleanly with anti-aliasing)
           const dist = Math.sqrt(
             (r - bgR) * (r - bgR) +
               (g - bgG) * (g - bgG) +
               (b - bgB) * (b - bgB)
           );
-          if (dist > 68) {
-            const intensity = Math.min(1, (dist - 50) / 140);
-            data[p] = rTint;
-            data[p + 1] = gTint;
-            data[p + 2] = bTint;
-            data[p + 3] = Math.round(255 * intensity);
-          } else {
-            data[p + 3] = 0;
-          }
-        } else {
-          const lum = 0.299 * r + 0.587 * g + 0.114 * b;
-          const shouldEngrave = options.invert
-            ? lum > options.threshold
-            : lum < options.threshold;
+          // Map contrastThreshold (40..220) to sensitivity when removing solid backgrounds
+          const lowCut = options.isReferenceCatalog
+            ? 38
+            : Math.max(18, Math.round(options.threshold * 0.28));
+          const highCut = options.isReferenceCatalog
+            ? 145
+            : Math.max(lowCut + 45, Math.round(options.threshold * 0.85));
 
-          if (shouldEngrave) {
-            data[p] = rTint;
-            data[p + 1] = gTint;
-            data[p + 2] = bTint;
-            data[p + 3] = Math.min(255, Math.round(alpha * 0.95));
+          const intensity = smoothstep(lowCut, highCut, dist);
+          outAlpha = Math.round(alpha * intensity);
+        } else {
+          // Transparent PNG / SVG logo: smooth anti-aliased luminance or alpha preservation
+          const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+          if (options.invert) {
+            // Invert mode emphasizes lighter strokes
+            const weight = smoothstep(
+              Math.max(0, options.threshold - 45),
+              Math.min(255, options.threshold + 25),
+              lum
+            );
+            outAlpha = Math.round(alpha * (0.25 + 0.75 * weight));
           } else {
-            data[p + 3] = 0;
+            // Standard mode preserves all opaque/colored logo shapes smoothly
+            const lumWeight = smoothstep(
+              Math.min(255, options.threshold + 85),
+              Math.max(0, options.threshold - 35),
+              lum
+            );
+            // Ensure vivid colored logos on transparent backgrounds never vanish
+            const maxC = Math.max(r, g, b);
+            const minC = Math.min(r, g, b);
+            const saturation = maxC === 0 ? 0 : (maxC - minC) / maxC;
+            const combinedWeight = Math.max(lumWeight, saturation * 0.92, 0.35);
+            outAlpha = Math.round(alpha * Math.min(1, combinedWeight));
           }
+        }
+
+        if (outAlpha > 8) {
+          // Subtle brushed metallic micro-variation for authentic laser-etched aluminum look
+          const grain = (y % 3 === 0 ? 0.94 : 1.0);
+          data[p] = Math.min(255, Math.round(rTint * grain));
+          data[p + 1] = Math.min(255, Math.round(gTint * grain));
+          data[p + 2] = Math.min(255, Math.round(bTint * grain));
+          data[p + 3] = outAlpha;
+
+          if (x < minX) minX = x;
+          if (x > maxX) maxX = x;
+          if (y < minY) minY = y;
+          if (y > maxY) maxY = y;
+        } else {
+          data[p + 3] = 0;
         }
       }
     }
 
-    offCtx.putImageData(imgData, 0, 0);
-    ctx.drawImage(offCanvas, -drawW / 2, -drawH / 2, drawW, drawH);
+    workCtx.putImageData(imgData, 0, 0);
+
+    // Fallback if image was completely empty
+    if (maxX <= minX || maxY <= minY) {
+      minX = 0;
+      minY = 0;
+      maxX = sampleW - 1;
+      maxY = sampleH - 1;
+    }
+
+    const trimW = maxX - minX + 1;
+    const trimH = maxY - minY + 1;
+
+    // Fit trimmed logo cleanly inside the engraving zone
+    const maxW = 410;
+    const maxH = 216;
+    const fitRatio = Math.min(maxW / trimW, maxH / trimH);
+    const drawW = Math.max(1, Math.round(trimW * fitRatio));
+    const drawH = Math.max(1, Math.round(trimH * fitRatio));
+
+    const outCanvas = document.createElement('canvas');
+    // 2x oversampling in cache for crisp Retina scaling & rotation
+    outCanvas.width = drawW * 2;
+    outCanvas.height = drawH * 2;
+    const outCtx = outCanvas.getContext('2d');
+    if (!outCtx) return;
+
+    outCtx.imageSmoothingEnabled = true;
+    outCtx.imageSmoothingQuality = 'high';
+    outCtx.drawImage(
+      workCanvas,
+      minX,
+      minY,
+      trimW,
+      trimH,
+      0,
+      0,
+      drawW * 2,
+      drawH * 2
+    );
+
+    stencilCacheRef.current = {
+      key: cacheKey,
+      canvas: outCanvas,
+      drawW,
+      drawH,
+    };
+
+    ctx.drawImage(outCanvas, -drawW / 2, -drawH / 2, drawW, drawH);
   };
 
-  // Core 60fps HTML5 Canvas Render Pipeline
+  // Core 60fps HTML5 Canvas Render Pipeline (HiDPI Retina-aware)
   const renderCanvas = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
+    const dpr =
+      typeof window !== 'undefined'
+        ? Math.min(window.devicePixelRatio || 1, 2)
+        : 1;
+    const targetW = Math.round(CANVAS_WIDTH * dpr);
+    const targetH = Math.round(CANVAS_HEIGHT * dpr);
+    if (canvas.width !== targetW || canvas.height !== targetH) {
+      canvas.width = targetW;
+      canvas.height = targetH;
+    }
+
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
     // 1. Dark Studio Background Grid
