@@ -18,10 +18,18 @@ import {
   PackagePlus,
   ChevronDown,
   ChevronUp,
+  Copy,
+  Check,
+  Image as ImageIcon,
 } from 'lucide-react';
 import { useCustomizerStore } from '@/hooks/useCustomizerStore';
 import { DeliveryMethod, OrderCustomerDetails } from '@/types';
-import { sendOrderToInstagram } from '@/utils/instagram';
+import {
+  sendOrderToInstagram,
+  buildInstagramOrderText,
+  copyOrderTextToClipboard,
+  copyImageSrcToClipboard,
+} from '@/utils/instagram';
 import {
   calculateShipping,
   FEDEX_FLAT_RATE_MXN,
@@ -56,6 +64,10 @@ export default function CartDrawer() {
   const [step, setStep] = useState<'list' | 'details' | 'sent'>('list');
   const [deliveryMethod, setDeliveryMethod] = useState<DeliveryMethod>('fedex');
   const [isSending, setIsSending] = useState(false);
+  const [lastOrderText, setLastOrderText] = useState('');
+  const [lastImageSrc, setLastImageSrc] = useState('');
+  const [copiedTextFeedback, setCopiedTextFeedback] = useState(false);
+  const [copiedImageFeedback, setCopiedImageFeedback] = useState(false);
   const [customer, setCustomer] = useState<OrderCustomerDetails>({
     fullName: '',
     street: '',
@@ -81,15 +93,20 @@ export default function CartDrawer() {
     };
 
     const primaryItem = orderList.find((i) => i.previewDataUrl) || orderList[0];
+    const previewSrc = primaryItem?.previewDataUrl || '';
+    const generatedText = buildInstagramOrderText(orderList, customerWithDelivery);
+    setLastOrderText(generatedText);
+    setLastImageSrc(previewSrc);
 
     try {
-      await sendOrderToInstagram({
+      const result = await sendOrderToInstagram({
         items: orderList,
         customer: customerWithDelivery,
-        canvasDataUrl: primaryItem?.previewDataUrl || '',
+        canvasDataUrl: previewSrc,
         sourceImageDataUrl: primaryItem?.uploadedImageSrc || null,
         fileNamePrefix: `pedido-freseros-${primaryItem?.code || 'custom'}`,
       });
+      setCopiedImageFeedback(result.copiedToClipboard);
       setStep('sent');
     } catch {
       setStep('sent');
@@ -692,28 +709,84 @@ export default function CartDrawer() {
                   </p>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-left text-xs space-y-2.5 text-slate-700">
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-left text-xs space-y-3 text-slate-700">
                   <p className="font-bold text-slate-900 flex items-center gap-1.5">
                     <Sparkles className="w-4 h-4 text-[#E5007D]" />
-                    ¿Cómo enviar la imagen en Instagram?
+                    Envía tu pedido + imagen en el chat de Instagram:
                   </p>
                   <ol className="list-decimal pl-4 space-y-1 text-slate-600">
                     <li>
-                      En el chat de Instagram, presiona{' '}
+                      La imagen de tu fresero ya se{' '}
+                      <strong className="text-slate-900">
+                        descargó automáticamente
+                      </strong>{' '}
+                      y se copió al portapapeles. En el chat presiona{' '}
                       <strong className="text-slate-900">Pegar (Ctrl+V)</strong>{' '}
-                      para adjuntar la imagen copiada.
+                      o adjunta el archivo descargado.
                     </li>
                     <li>
-                      O toca el ícono de imagen/galería y selecciona la imagen
-                      descargada.
-                    </li>
-                    <li>
-                      ¡Listo! Te responderemos para confirmar tu pedido y número
-                      de guía de FedEx.
+                      Copia los datos de tu pedido con el botón de abajo y
+                      pégalos en el mismo chat.
                     </li>
                   </ol>
 
-                  <div className="pt-2 flex flex-col sm:flex-row gap-2">
+                  {/* Botones rápidos para copiar imagen y texto */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        const ok = await copyOrderTextToClipboard(lastOrderText);
+                        if (ok) {
+                          setCopiedTextFeedback(true);
+                          setTimeout(() => setCopiedTextFeedback(false), 3000);
+                        }
+                      }}
+                      className="inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-white hover:bg-slate-100 border border-slate-300 text-slate-900 font-extrabold text-[11px] transition shadow-sm"
+                    >
+                      {copiedTextFeedback ? (
+                        <>
+                          <Check className="w-3.5 h-3.5 text-emerald-600" />
+                          ¡Texto Copiado!
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="w-3.5 h-3.5 text-[#00AEEF]" />
+                          Copiar Texto del Pedido
+                        </>
+                      )}
+                    </button>
+
+                    {lastImageSrc && (
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          const ok = await copyImageSrcToClipboard(lastImageSrc);
+                          if (ok) {
+                            setCopiedImageFeedback(true);
+                            setTimeout(
+                              () => setCopiedImageFeedback(false),
+                              3000
+                            );
+                          }
+                        }}
+                        className="inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-white hover:bg-slate-100 border border-slate-300 text-slate-900 font-extrabold text-[11px] transition shadow-sm"
+                      >
+                        {copiedImageFeedback ? (
+                          <>
+                            <Check className="w-3.5 h-3.5 text-emerald-600" />
+                            ¡Imagen Copiada!
+                          </>
+                        ) : (
+                          <>
+                            <ImageIcon className="w-3.5 h-3.5 text-[#E5007D]" />
+                            Copiar Imagen (Ctrl+V)
+                          </>
+                        )}
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="pt-1 flex flex-col sm:flex-row gap-2">
                     <a
                       href={INSTAGRAM_DIRECT_URL}
                       target="_blank"

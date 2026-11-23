@@ -86,31 +86,77 @@ export function buildInstagramOrderText(
 }
 
 /**
- * Convierte un dataURL base64 a un Blob.
+ * Convierte cualquier fuente de imagen (dataURL, URL relativa /Catalogo/..., JPG o PNG)
+ * a un Blob PNG garantizado (requerido por ClipboardItem y Web Share API).
  */
-function dataUrlToBlob(dataUrl: string): Blob | null {
+export async function imageSrcToPngBlob(src: string): Promise<Blob | null> {
+  if (!src || typeof window === 'undefined') return null;
+
   try {
-    const arr = dataUrl.split(',');
-    const mimeMatch = arr[0].match(/:(.*?);/);
-    const mime = mimeMatch ? mimeMatch[1] : 'image/png';
-    const bstr = atob(arr[1]);
-    let n = bstr.length;
-    const u8arr = new Uint8Array(n);
-    while (n--) {
-      u8arr[n] = bstr.charCodeAt(n);
-    }
-    return new Blob([u8arr], { type: mime });
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    await new Promise<void>((resolve, reject) => {
+      img.onload = () => resolve();
+      img.onerror = () => reject(new Error('Image load failed'));
+      img.src = src;
+    });
+
+    const canvas = document.createElement('canvas');
+    canvas.width = img.naturalWidth || img.width || 600;
+    canvas.height = img.naturalHeight || img.height || 600;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return null;
+
+    ctx.drawImage(img, 0, 0);
+    return await new Promise<Blob | null>((resolve) =>
+      canvas.toBlob((b) => resolve(b), 'image/png')
+    );
   } catch {
-    return null;
+    try {
+      const res = await fetch(src);
+      return await res.blob();
+    } catch {
+      return null;
+    }
   }
 }
 
+export async function copyOrderTextToClipboard(text: string): Promise<boolean> {
+  if (!text || typeof navigator === 'undefined' || !navigator.clipboard) {
+    return false;
+  }
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export async function copyImageSrcToClipboard(src: string): Promise<boolean> {
+  const blob = await imageSrcToPngBlob(src);
+  if (!blob || typeof window === 'undefined' || !navigator.clipboard) {
+    return false;
+  }
+  try {
+    if ('ClipboardItem' in window) {
+      await navigator.clipboard.write([
+        new ClipboardItem({ 'image/png': blob }),
+      ]);
+      return true;
+    }
+  } catch {
+    return false;
+  }
+  return false;
+}
+
 /**
- * Envía el pedido y la imagen directamente a Instagram:
- * 1. Intenta `navigator.share` con el archivo de imagen para abrir directamente
- *    Instagram Direct con la imagen y el texto adjuntos.
- * 2. Si no está soportado (ej. Desktop), copia la imagen al portapapeles (Ctrl+V)
- *    y abre el chat de Instagram Direct (https://ig.me/m/creative.tools.mx).
+ * Envía el pedido y la imagen hacia Instagram:
+ * 1. Convierte la imagen (del simulador o del catálogo) a PNG.
+ * 2. En móviles compatibles usa Web Share API con el archivo PNG + texto del pedido.
+ * 3. En escritorio: copia el PNG al portapapeles (Ctrl+V), descarga la imagen
+ *    automáticamente y abre el chat de Instagram Direct (@creative.tools.mx).
  */
 export async function sendOrderToInstagram(params: {
   items: OrderItem[];
@@ -122,16 +168,22 @@ export async function sendOrderToInstagram(params: {
   sharedNatively: boolean;
   copiedToClipboard: boolean;
   downloaded: boolean;
+  orderText: string;
 }> {
-  const { items, customer, canvasDataUrl, fileNamePrefix = 'pedido-fresero' } =
-    params;
+  const {
+    items,
+    customer,
+    canvasDataUrl,
+    sourceImageDataUrl,
+    fileNamePrefix = 'pedido-fresero',
+  } = params;
   const orderText = buildInstagramOrderText(items, customer);
 
   let sharedNatively = false;
   let copiedToClipboard = false;
   let downloaded = false;
 
-  const blob = canvasDataUrl ? dataUrlToBlob(canvasDataUrl) : null;
+  const blob = canvasDataUrl ? await imageSrcToPngBlob(canvasDataUrl) : null;
 
   // 1. Intento con Web Share API con archivos (abre directamente Instagram en móviles)
   if (blob && typeof navigator !== 'undefined' && 'share' in navigator) {
@@ -150,14 +202,19 @@ export async function sendOrderToInstagram(params: {
           files: [file],
         });
         sharedNatively = true;
-        return { sharedNatively, copiedToClipboard: false, downloaded: false };
+        return {
+          sharedNatively,
+          copiedToClipboard: false,
+          downloaded: false,
+          orderText,
+        };
       }
     } catch {
-      // Si el usuario canceló el share o falló, continuamos con portapapeles y enlace
+      // Si el usuario canceló el share o falló, continuamos con portapapeles + descarga + enlace
     }
   }
 
-  // 2. Copia al portapapeles de la imagen
+  // 2. Copia al portapapeles de la imagen PNG
   if (blob && typeof window !== 'undefined' && navigator.clipboard) {
     try {
       if ('ClipboardItem' in window) {
@@ -171,16 +228,37 @@ export async function sendOrderToInstagram(params: {
     }
   }
 
-  // 3. Descarga de respaldo para que el cliente tenga el archivo
-  if (canvasDataUrl && typeof document !== 'undefined') {
+  // 3. Descarga automática del archivo PNG (y logo original si se subió)
+  if (typeof document !== 'undefined') {
     try {
-      const link = document.createElement('a');
-      link.download = `${fileNamePrefix}-diseno.png`;
-      link.href = canvasDataUrl;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      downloaded = true;
+      if (blob) {
+        const blobUrl = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.download = `${fileNamePrefix}-diseno.png`;
+        link.href = blobUrl;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 2000);
+        downloaded = true;
+      } else if (canvasDataUrl) {
+        const link = document.createElement('a');
+        link.download = `${fileNamePrefix}-diseno.png`;
+        link.href = canvasDataUrl;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        downloaded = true;
+      }
+
+      if (sourceImageDataUrl) {
+        const srcLink = document.createElement('a');
+        srcLink.download = `${fileNamePrefix}-logo-original.png`;
+        srcLink.href = sourceImageDataUrl;
+        document.body.appendChild(srcLink);
+        srcLink.click();
+        document.body.removeChild(srcLink);
+      }
     } catch {
       downloaded = false;
     }
@@ -188,10 +266,11 @@ export async function sendOrderToInstagram(params: {
 
   // 4. Abre Instagram Direct con la cuenta @creative.tools.mx
   if (typeof window !== 'undefined') {
-    const directUrl = INSTAGRAM_DIRECT_URL || `https://ig.me/m/creative.tools.mx`;
+    const directUrl =
+      INSTAGRAM_DIRECT_URL || `https://ig.me/m/creative.tools.mx`;
     window.open(directUrl, '_blank', 'noopener,noreferrer');
   }
 
-  return { sharedNatively, copiedToClipboard, downloaded };
+  return { sharedNatively, copiedToClipboard, downloaded, orderText };
 }
 
