@@ -1,5 +1,5 @@
 import { OrderCustomerDetails, OrderItem } from '@/types';
-import { buildInstagramOrderText } from './instagram';
+import { buildInstagramOrderText, imageSrcToPngBlob } from './instagram';
 
 // Canal interno de recepción de pedidos (no se muestra en la interfaz).
 // El contacto público para dudas y cotizaciones es Instagram (ver utils/brand.ts).
@@ -24,10 +24,11 @@ export function buildOrderWhatsAppUrl(
 export const buildOrderListWhatsAppUrl = buildOrderWhatsAppUrl;
 
 /**
- * Prepara la imagen a grabar para enviarla junto con el pedido:
- * 1. Copia el PNG al portapapeles (Ctrl+V en el chat)
- * 2. Descarga el PNG (y la imagen original si es logo propio)
- * 3. Abre el chat de pedidos con el mensaje prellenado
+ * Prepara la imagen a grabar para enviarla junto con el pedido por WhatsApp:
+ * 1. Convierte la imagen (simulador o catálogo) a PNG garantizado
+ * 2. Copia el PNG al portapapeles (Ctrl+V directo en WhatsApp)
+ * 3. Descarga el PNG (y el logo original si se subió uno propio)
+ * 4. Abre WhatsApp con todo el mensaje del pedido ya escrito
  */
 export async function sendOrderWithImage(params: {
   orderUrl?: string;
@@ -42,28 +43,42 @@ export async function sendOrderWithImage(params: {
   let copiedToClipboard = false;
   let downloaded = false;
 
-  if (canvasDataUrl && typeof window !== 'undefined') {
+  const blob = canvasDataUrl ? await imageSrcToPngBlob(canvasDataUrl) : null;
+
+  if (blob && typeof window !== 'undefined' && navigator.clipboard) {
     try {
-      const response = await fetch(canvasDataUrl);
-      const blob = await response.blob();
-      if (navigator.clipboard && 'ClipboardItem' in window) {
+      if ('ClipboardItem' in window) {
         await navigator.clipboard.write([
-          new ClipboardItem({ [blob.type || 'image/png']: blob }),
+          new ClipboardItem({ 'image/png': blob }),
         ]);
         copiedToClipboard = true;
       }
     } catch {
       copiedToClipboard = false;
     }
+  }
 
+  if (typeof document !== 'undefined') {
     try {
-      const link = document.createElement('a');
-      link.download = `${fileNamePrefix}-vista-previa.png`;
-      link.href = canvasDataUrl;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      downloaded = true;
+      if (blob) {
+        const blobUrl = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.download = `${fileNamePrefix}-vista-previa.png`;
+        link.href = blobUrl;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 2000);
+        downloaded = true;
+      } else if (canvasDataUrl) {
+        const link = document.createElement('a');
+        link.download = `${fileNamePrefix}-vista-previa.png`;
+        link.href = canvasDataUrl;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        downloaded = true;
+      }
 
       if (sourceImageDataUrl) {
         const srcLink = document.createElement('a');

@@ -21,15 +21,19 @@ import {
   Copy,
   Check,
   Image as ImageIcon,
+  MessageCircle,
 } from 'lucide-react';
 import { useCustomizerStore } from '@/hooks/useCustomizerStore';
 import { DeliveryMethod, OrderCustomerDetails } from '@/types';
 import {
-  sendOrderToInstagram,
   buildInstagramOrderText,
   copyOrderTextToClipboard,
   copyImageSrcToClipboard,
 } from '@/utils/instagram';
+import {
+  buildOrderWhatsAppUrl,
+  sendOrderWithImage,
+} from '@/utils/whatsapp';
 import {
   calculateShipping,
   FEDEX_FLAT_RATE_MXN,
@@ -66,6 +70,7 @@ export default function CartDrawer() {
   const [isSending, setIsSending] = useState(false);
   const [lastOrderText, setLastOrderText] = useState('');
   const [lastImageSrc, setLastImageSrc] = useState('');
+  const [lastWhatsAppUrl, setLastWhatsAppUrl] = useState('');
   const [copiedTextFeedback, setCopiedTextFeedback] = useState(false);
   const [copiedImageFeedback, setCopiedImageFeedback] = useState(false);
   const [customer, setCustomer] = useState<OrderCustomerDetails>({
@@ -83,7 +88,7 @@ export default function CartDrawer() {
   const shippingInfo = calculateShipping(orderList, deliveryMethod);
   const totalPieces = shippingInfo.totalPieces;
 
-  const handleSendToInstagram = async (e: React.FormEvent) => {
+  const handleSendOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSending(true);
 
@@ -95,13 +100,15 @@ export default function CartDrawer() {
     const primaryItem = orderList.find((i) => i.previewDataUrl) || orderList[0];
     const previewSrc = primaryItem?.previewDataUrl || '';
     const generatedText = buildInstagramOrderText(orderList, customerWithDelivery);
+    const waUrl = buildOrderWhatsAppUrl(orderList, customerWithDelivery);
+
     setLastOrderText(generatedText);
     setLastImageSrc(previewSrc);
+    setLastWhatsAppUrl(waUrl);
 
     try {
-      const result = await sendOrderToInstagram({
-        items: orderList,
-        customer: customerWithDelivery,
+      const result = await sendOrderWithImage({
+        whatsappUrl: waUrl,
         canvasDataUrl: previewSrc,
         sourceImageDataUrl: primaryItem?.uploadedImageSrc || null,
         fileNamePrefix: `pedido-freseros-${primaryItem?.code || 'custom'}`,
@@ -484,7 +491,7 @@ export default function CartDrawer() {
             ) : step === 'details' ? (
               <form
                 id="order-form"
-                onSubmit={handleSendToInstagram}
+                onSubmit={handleSendOrder}
                 className="space-y-4 text-xs"
               >
                 {/* Delivery Method Selection */}
@@ -697,41 +704,65 @@ export default function CartDrawer() {
 
                 <div>
                   <h4 className="text-xl font-black text-slate-900">
-                    ¡Pedido Listo para Enviar a Instagram!
+                    ¡Pedido Listo en WhatsApp!
                   </h4>
                   <p className="text-xs text-slate-600 mt-1.5 max-w-sm mx-auto leading-relaxed">
-                    Se abrió la conversación de Instagram con{' '}
-                    <strong className="text-slate-900">
-                      {OFFICIAL_INSTAGRAM_HANDLE}
-                    </strong>
-                    . La imagen de tu diseño a grabar se copió automáticamente al
-                    portapapeles y se descargó en tu dispositivo.
+                    Se abrió <strong className="text-slate-900">WhatsApp</strong>{' '}
+                    con todo tu pedido, precios y dirección ya escritos. La
+                    imagen de tu diseño se descargó y copió automáticamente al
+                    portapapeles.
                   </p>
                 </div>
 
                 <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-left text-xs space-y-3 text-slate-700">
                   <p className="font-bold text-slate-900 flex items-center gap-1.5">
-                    <Sparkles className="w-4 h-4 text-[#E5007D]" />
-                    Envía tu pedido + imagen en el chat de Instagram:
+                    <Sparkles className="w-4 h-4 text-emerald-600" />
+                    Solo falta un paso en WhatsApp:
                   </p>
                   <ol className="list-decimal pl-4 space-y-1 text-slate-600">
                     <li>
-                      La imagen de tu fresero ya se{' '}
-                      <strong className="text-slate-900">
-                        descargó automáticamente
-                      </strong>{' '}
-                      y se copió al portapapeles. En el chat presiona{' '}
+                      En la conversación de WhatsApp que se abrió, presiona{' '}
                       <strong className="text-slate-900">Pegar (Ctrl+V)</strong>{' '}
-                      o adjunta el archivo descargado.
+                      (o adjunta la imagen descargada) para enviar la foto del
+                      diseño junto con el mensaje ya escrito.
                     </li>
                     <li>
-                      Copia los datos de tu pedido con el botón de abajo y
-                      pégalos en el mismo chat.
+                      Presiona <strong className="text-slate-900">Enviar</strong>{' '}
+                      para confirmar tu pedido.
                     </li>
                   </ol>
 
                   {/* Botones rápidos para copiar imagen y texto */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                    {lastImageSrc && (
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          const ok = await copyImageSrcToClipboard(lastImageSrc);
+                          if (ok) {
+                            setCopiedImageFeedback(true);
+                            setTimeout(
+                              () => setCopiedImageFeedback(false),
+                              3000
+                            );
+                          }
+                        }}
+                        className="inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-white hover:bg-slate-100 border border-slate-300 text-slate-900 font-extrabold text-[11px] transition shadow-sm"
+                      >
+                        {copiedImageFeedback ? (
+                          <>
+                            <Check className="w-3.5 h-3.5 text-emerald-600" />
+                            ¡Imagen Copiada!
+                          </>
+                        ) : (
+                          <>
+                            <ImageIcon className="w-3.5 h-3.5 text-emerald-600" />
+                            Copiar Imagen (Ctrl+V)
+                          </>
+                        )}
+                      </button>
+                    )}
+
                     <button
                       type="button"
                       onClick={async () => {
@@ -755,56 +786,29 @@ export default function CartDrawer() {
                         </>
                       )}
                     </button>
-
-                    {lastImageSrc && (
-                      <button
-                        type="button"
-                        onClick={async () => {
-                          const ok = await copyImageSrcToClipboard(lastImageSrc);
-                          if (ok) {
-                            setCopiedImageFeedback(true);
-                            setTimeout(
-                              () => setCopiedImageFeedback(false),
-                              3000
-                            );
-                          }
-                        }}
-                        className="inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-white hover:bg-slate-100 border border-slate-300 text-slate-900 font-extrabold text-[11px] transition shadow-sm"
-                      >
-                        {copiedImageFeedback ? (
-                          <>
-                            <Check className="w-3.5 h-3.5 text-emerald-600" />
-                            ¡Imagen Copiada!
-                          </>
-                        ) : (
-                          <>
-                            <ImageIcon className="w-3.5 h-3.5 text-[#E5007D]" />
-                            Copiar Imagen (Ctrl+V)
-                          </>
-                        )}
-                      </button>
-                    )}
                   </div>
 
                   <div className="pt-1 flex flex-col sm:flex-row gap-2">
+                    {lastWhatsAppUrl && (
+                      <a
+                        href={lastWhatsAppUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex-1 inline-flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-sm transition"
+                      >
+                        <MessageCircle className="w-4 h-4" />
+                        Abrir WhatsApp de Nuevo
+                      </a>
+                    )}
+
                     <a
                       href={INSTAGRAM_DIRECT_URL}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex-1 inline-flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-slate-900 text-white font-extrabold text-xs shadow-sm hover:bg-slate-800 transition"
-                    >
-                      <Instagram className="w-4 h-4 text-[#E5007D]" />
-                      Abrir Chat de Instagram Direct
-                    </a>
-
-                    <a
-                      href={OFFICIAL_INSTAGRAM_URL}
-                      target="_blank"
-                      rel="noopener noreferrer"
                       className="inline-flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 font-bold text-xs transition"
                     >
-                      <ExternalLink className="w-3.5 h-3.5" />
-                      Ver Página de Instagram
+                      <Instagram className="w-3.5 h-3.5 text-[#E5007D]" />
+                      Instagram Direct
                     </a>
                   </div>
                 </div>
@@ -878,12 +882,12 @@ export default function CartDrawer() {
                     type="submit"
                     form="order-form"
                     disabled={isSending}
-                    className="flex-1 inline-flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-black text-xs sm:text-sm shadow-md transition active:scale-[0.99] disabled:opacity-50"
+                    className="flex-1 inline-flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs sm:text-sm shadow-md transition active:scale-[0.99] disabled:opacity-50"
                   >
-                    <Instagram className="w-4 h-4 text-[#E5007D]" />
+                    <MessageCircle className="w-4 h-4" />
                     {isSending
                       ? 'Preparando envío...'
-                      : `Enviar Pedido (${formatCurrencyMx(
+                      : `Enviar Pedido por WhatsApp (${formatCurrencyMx(
                           shippingInfo.totalMxn
                         )})`}
                   </button>
